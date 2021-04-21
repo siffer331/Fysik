@@ -1,0 +1,78 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=4
+
+_global_script_classes=[ {
+"base": "Node",
+"class": "A",
+"language": "GDScript",
+"path": "res://Src/Main/Arimetic.gd"
+}, {
+"base": "Control",
+"class": "Code",
+"language": "GDScript",
+"path": "res://Src/Code/Code.gd"
+}, {
+"base": "Container",
+"class": "ColoumnFill",
+"language": "GDScript",
+"path": "res://Src/Util/FillGrid.gd"
+}, {
+"base": "Node",
+"class": "Command",
+"language": "GDScript",
+"path": "res://Src/Code/Commands.gd"
+}, {
+"base": "Node",
+"class": "UA",
+"language": "GDScript",
+"path": "res://Src/Main/Unit_A.gd"
+}, {
+"base": "Object",
+"class": "Unit",
+"language": "GDScript",
+"path": "res://Src/Main/Unit.gd"
+}, {
+"base": "Object",
+"class": "Value",
+"language": "GDScript",
+"path": "res://Src/Main/Value.gd"
+} ]
+_global_script_class_icons={
+"A": "",
+"Code": "",
+"ColoumnFill": "",
+"Command": "",
+"UA": "",
+"Unit": "",
+"Value": ""
+}
+
+[application]
+
+config/name="Fysik"
+run/main_scene="res://Src/Main/Main.tscn"
+config/icon="res://icon.png"
+
+[autoload]
+
+Data="*res://Src/Main/Data.gd"
+Commands="*res://Src/Code/Commands.gd"
+
+[input]
+
+"run line"={
+"deadzone": 0.5,
+"events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":true,"meta":false,"command":true,"pressed":false,"scancode":16777221,"unicode":0,"echo":false,"script":null)
+ ]
+}
+
+[rendering]
+
+environment/default_environment="res://default_env.tres"

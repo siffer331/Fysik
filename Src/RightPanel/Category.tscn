@@ -1,0 +1,31 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://Src/Util/FillGrid.gd" type="Script" id=1]
+[ext_resource path="res://Src/RightPanel/Category.gd" type="Script" id=2]
+
+[node name="Category" type="VBoxContainer"]
+margin_right = 79.0
+margin_bottom = 60.0
+custom_constants/separation = 0
+script = ExtResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="."]
+margin_right = 79.0
+margin_bottom = 14.0
+text = "Length"
+valign = 1
+
+[node name="Separator" type="HSeparator" parent="."]
+margin_top = 14.0
+margin_right = 79.0
+margin_bottom = 18.0
+
+[node name="Grid" type="Container" parent="."]
+margin_top = 18.0
+margin_right = 79.0
+margin_bottom = 18.0
+script = ExtResource( 1 )
+separation = 2

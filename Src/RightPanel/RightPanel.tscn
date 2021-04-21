@@ -1,0 +1,236 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://Src/RightPanel/Formulas.gd" type="Script" id=1]
+[ext_resource path="res://Src/RightPanel/Units.gd" type="Script" id=2]
+[ext_resource path="res://Src/Util/FillGrid.gd" type="Script" id=3]
+[ext_resource path="res://Src/RightPanel/Symbols.gd" type="Script" id=4]
+
+[node name="RightPanel" type="Control"]
+margin_right = 200.0
+margin_bottom = 570.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Background" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color( 0.180392, 0.184314, 0.196078, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Margin" type="MarginContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_constants/margin_right = 5
+custom_constants/margin_top = 5
+custom_constants/margin_left = 5
+custom_constants/margin_bottom = 5
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Sepperator" type="VSplitContainer" parent="Margin"]
+margin_left = 5.0
+margin_top = 5.0
+margin_right = 195.0
+margin_bottom = 565.0
+custom_constants/separation = 6
+split_offset = 440
+
+[node name="Sepperator" type="VSplitContainer" parent="Margin/Sepperator"]
+margin_right = 190.0
+margin_bottom = 492.0
+custom_constants/separation = 6
+split_offset = 350
+
+[node name="Formulas" type="Control" parent="Margin/Sepperator/Sepperator"]
+margin_right = 190.0
+margin_bottom = 372.0
+rect_min_size = Vector2( 0, 22 )
+script = ExtResource( 1 )
+
+[node name="Background2" type="ColorRect" parent="Margin/Sepperator/Sepperator/Formulas"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color( 0.14902, 0.14902, 0.164706, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HeaderSplit" type="VBoxContainer" parent="Margin/Sepperator/Sepperator/Formulas"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_constants/separation = 0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="Margin/Sepperator/Sepperator/Formulas/HeaderSplit"]
+margin_right = 190.0
+margin_bottom = 20.0
+rect_min_size = Vector2( 0, 20 )
+text = "Formulas"
+align = 1
+valign = 1
+
+[node name="Separator" type="HSeparator" parent="Margin/Sepperator/Sepperator/Formulas/HeaderSplit"]
+margin_top = 20.0
+margin_right = 190.0
+margin_bottom = 24.0
+
+[node name="SearchMargin" type="MarginContainer" parent="Margin/Sepperator/Sepperator/Formulas/HeaderSplit"]
+margin_top = 24.0
+margin_right = 190.0
+margin_bottom = 48.0
+custom_constants/margin_right = 3
+custom_constants/margin_left = 3
+
+[node name="Search" type="LineEdit" parent="Margin/Sepperator/Sepperator/Formulas/HeaderSplit/SearchMargin"]
+margin_left = 3.0
+margin_right = 187.0
+margin_bottom = 24.0
+placeholder_text = "Search"
+
+[node name="Margin" type="MarginContainer" parent="Margin/Sepperator/Sepperator/Formulas/HeaderSplit"]
+margin_top = 48.0
+margin_right = 190.0
+margin_bottom = 372.0
+size_flags_vertical = 3
+custom_constants/margin_right = 5
+custom_constants/margin_left = 5
+custom_constants/margin_bottom = 5
+
+[node name="Scroll" type="ScrollContainer" parent="Margin/Sepperator/Sepperator/Formulas/HeaderSplit/Margin"]
+margin_left = 5.0
+margin_right = 185.0
+margin_bottom = 319.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Split" type="VBoxContainer" parent="Margin/Sepperator/Sepperator/Formulas/HeaderSplit/Margin/Scroll"]
+margin_right = 180.0
+margin_bottom = 32.0
+rect_min_size = Vector2( 0, 32 )
+size_flags_horizontal = 3
+
+[node name="Units" type="Control" parent="Margin/Sepperator/Sepperator"]
+margin_top = 380.0
+margin_right = 190.0
+margin_bottom = 492.0
+rect_min_size = Vector2( 0, 22 )
+script = ExtResource( 2 )
+
+[node name="Background" type="ColorRect" parent="Margin/Sepperator/Sepperator/Units"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color( 0.14902, 0.14902, 0.164706, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HeaderSplit" type="VBoxContainer" parent="Margin/Sepperator/Sepperator/Units"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_constants/separation = 0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="Margin/Sepperator/Sepperator/Units/HeaderSplit"]
+margin_right = 190.0
+margin_bottom = 20.0
+rect_min_size = Vector2( 0, 20 )
+text = "Units"
+align = 1
+valign = 1
+
+[node name="Separator" type="HSeparator" parent="Margin/Sepperator/Sepperator/Units/HeaderSplit"]
+margin_top = 20.0
+margin_right = 190.0
+margin_bottom = 24.0
+
+[node name="Margin" type="MarginContainer" parent="Margin/Sepperator/Sepperator/Units/HeaderSplit"]
+margin_top = 24.0
+margin_right = 190.0
+margin_bottom = 112.0
+size_flags_vertical = 3
+custom_constants/margin_right = 5
+custom_constants/margin_left = 5
+custom_constants/margin_bottom = 5
+
+[node name="Scroll" type="ScrollContainer" parent="Margin/Sepperator/Sepperator/Units/HeaderSplit/Margin"]
+margin_left = 5.0
+margin_right = 185.0
+margin_bottom = 83.0
+size_flags_vertical = 3
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Split" type="VBoxContainer" parent="Margin/Sepperator/Sepperator/Units/HeaderSplit/Margin/Scroll"]
+margin_right = 180.0
+size_flags_horizontal = 3
+
+[node name="Symbols" type="Control" parent="Margin/Sepperator"]
+margin_top = 500.0
+margin_right = 190.0
+margin_bottom = 560.0
+rect_min_size = Vector2( 0, 22 )
+script = ExtResource( 4 )
+
+[node name="Background" type="ColorRect" parent="Margin/Sepperator/Symbols"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color( 0.14902, 0.14902, 0.164706, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HeaderSplit" type="VBoxContainer" parent="Margin/Sepperator/Symbols"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_constants/separation = 0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="Margin/Sepperator/Symbols/HeaderSplit"]
+margin_right = 190.0
+margin_bottom = 20.0
+rect_min_size = Vector2( 0, 20 )
+text = "Symbols"
+align = 1
+valign = 1
+
+[node name="Separator" type="HSeparator" parent="Margin/Sepperator/Symbols/HeaderSplit"]
+margin_top = 20.0
+margin_right = 190.0
+margin_bottom = 24.0
+
+[node name="Margin" type="MarginContainer" parent="Margin/Sepperator/Symbols/HeaderSplit"]
+margin_top = 24.0
+margin_right = 190.0
+margin_bottom = 60.0
+size_flags_vertical = 3
+custom_constants/margin_right = 5
+custom_constants/margin_left = 5
+custom_constants/margin_bottom = 5
+
+[node name="Scroll" type="ScrollContainer" parent="Margin/Sepperator/Symbols/HeaderSplit/Margin"]
+margin_left = 5.0
+margin_right = 185.0
+margin_bottom = 31.0
+size_flags_vertical = 3
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Coloumns" type="Container" parent="Margin/Sepperator/Symbols/HeaderSplit/Margin/Scroll"]
+margin_right = 180.0
+size_flags_horizontal = 3
+script = ExtResource( 3 )
+separation = 2
+[connection signal="text_changed" from="Margin/Sepperator/Sepperator/Formulas/HeaderSplit/SearchMargin/Search" to="Margin/Sepperator/Sepperator/Formulas" method="_on_Search_text_changed"]

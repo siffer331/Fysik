@@ -1,0 +1,7 @@
+[r]
+Radius of a circle.
+unit: m
+
+[o]
+Circumference of a circle.
+unit: m
