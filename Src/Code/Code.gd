@@ -15,11 +15,19 @@ const COMMANDS = {
 		"return": "Value",
 		"args": 1,
 	},
+	"tan" : {
+		"return": "Value",
+		"args": 1,
+	},
 	"cos" : {
 		"return": "Value",
 		"args": 1,
 	},
 	"sqrt" : {
+		"return": "Value",
+		"args": 1,
+	},
+	"sq" : {
 		"return": "Value",
 		"args": 1,
 	},
@@ -85,6 +93,7 @@ func _get_parts(line: String) -> Array:
 	var type = TYPES.EMPTY
 	var p1 = 0
 	var p2 = 0
+	line = line.split("#")[0]
 	for c in line:
 		if c in " 	:":
 			continue
@@ -100,6 +109,10 @@ func _get_parts(line: String) -> Array:
 				if c in types[i]:
 					c_type = i
 					break
+		if type == TYPES.WORD and c_type == TYPES.VALUE:
+			c_type = TYPES.WORD
+		if c_type == TYPES.WORD and type == TYPES.VALUE:
+			type = TYPES.WORD
 		if type == c_type:
 			part += c
 		else:

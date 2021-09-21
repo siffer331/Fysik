@@ -36,6 +36,17 @@ func sin(args: Array, code: Code) -> Array:
 	return [[value, Code.TYPES.VALUE]]
 
 
+func tan(args: Array, code: Code) -> Array:
+	var res := code.eval(args[0])
+	if len(res) == 1:
+		return ["error", res[0]]
+	var value = res[1][0]
+	value.value = tan(value.value)
+	if UA.equals(value.unit, Unit.new("r")):
+		value.unit = Unit.new("")
+	return [[value, Code.TYPES.VALUE]]
+
+
 func cos(args: Array, code: Code) -> Array:
 	var res := code.eval(args[0])
 	if len(res) == 1:
@@ -55,4 +66,15 @@ func sqrt(args: Array, code: Code) -> Array:
 	value.value = sqrt(value.value)
 	for unit in value.unit.units:
 		value.unit.units[unit] /= 2
+	return [[value, Code.TYPES.VALUE]]
+
+
+func sq(args: Array, code: Code) -> Array:
+	var res = code.eval(args[0])
+	if len(res) == 1:
+		return ["error", res[0]]
+	var value = res[1][0]
+	value.value = value.value*value.value
+	for unit in value.unit.units:
+		value.unit.units[unit] *= 2
 	return [[value, Code.TYPES.VALUE]]

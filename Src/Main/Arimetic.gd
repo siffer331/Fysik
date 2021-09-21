@@ -51,7 +51,7 @@ static func add(a: Value, b: Value):
 static func subtract(a: Value, b: Value):
 	if not UA.equals(a.unit, b.unit):
 		return "/Cant subtract different units"
-	var res = Value.new(a.value+b.value)
+	var res = Value.new(a.value-b.value)
 	res.unit = copy(a.unit)
 	return res
 
