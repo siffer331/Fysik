@@ -26,7 +26,15 @@ s
 r
 180 deg = PI r
 
+[electricity]
+A
+
 [derived]
 N = kg*m/s^2
 J = kg*m^2/s^2
+C = A*s
+V = J/C
+W = J/s
+Ω = V/A
+S = A/V
 
