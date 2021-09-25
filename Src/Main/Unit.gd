@@ -79,6 +79,8 @@ func convert_to_si() -> float:
 func _simplify() -> void:
 	for part in units.keys():
 		if units[part] == 0:
-			units.erase(part) 
+			units.erase(part)
+	if "1" in units:
+		units.erase("1")
 
 

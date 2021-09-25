@@ -233,4 +233,5 @@ margin_right = 180.0
 size_flags_horizontal = 3
 script = ExtResource( 3 )
 separation = 2
+
 [connection signal="text_changed" from="Margin/Sepperator/Sepperator/Formulas/HeaderSplit/SearchMargin/Search" to="Margin/Sepperator/Sepperator/Formulas" method="_on_Search_text_changed"]

@@ -109,6 +109,9 @@ func _get_parts(line: String) -> Array:
 				if c in types[i]:
 					c_type = i
 					break
+		if len(part) > 0:
+			if (part[len(part)-1] == "1" and c == "e") or (part[len(part)-1] == "e" and c == "-"):
+				c_type = TYPES.VALUE
 		if type == TYPES.WORD and c_type == TYPES.VALUE:
 			c_type = TYPES.WORD
 		if c_type == TYPES.WORD and type == TYPES.VALUE:
@@ -142,7 +145,7 @@ func eval(line: String) -> Array:
 	var index = 0
 	while index < len(parts):
 		if parts[index][1] == TYPES.VALUE:
-			var value = float(parts[index][0])
+			var value = parts[index][0]
 			var unit := "[]"
 			if index < len(parts) - 1 and parts[index+1][1] == TYPES.UNIT:
 				unit = parts[index+1][0]
@@ -174,7 +177,7 @@ func eval(line: String) -> Array:
 				elif parts[index][0] in Data.constants:
 					var constant = Data.constants[parts[index][0]]
 					var unit = "[" + constant[1] + "]"
-					parts[index] = [Value.new(float(constant[0]), unit), TYPES.VALUE]
+					parts[index] = [Value.new(constant[0], unit), TYPES.VALUE]
 				else:
 					return ["/Cant find variable " + parts[index][0]]
 		index += 1
@@ -184,7 +187,7 @@ func eval(line: String) -> Array:
 			if len(res) == 1:
 				return res
 			parts[i] = res[1]
-	for operation in "*/+-":
+	for operation in "^*/+-":
 		var error = operate(parts, operation)
 		if error != "":
 			return [error]
@@ -212,6 +215,8 @@ func operate(parts: Array, operation: String) -> String:
 			if parts[i+1][1] != 1:
 				return "/Cant convert '{part}' to a number".format({"part":parts[i+1][0]})
 			match(operation):
+				'^':
+					parts[i][0] = A.power(parts[i-1][0],parts[i+1][0])
 				'*':
 					parts[i][0] = A.multiply_v(parts[i-1][0],parts[i+1][0])
 				'/':

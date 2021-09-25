@@ -3,5 +3,3 @@
 o=r*2*PI
 r=o/2*PI
 
-[sving]
-v=sqrt((sin(α)+μ*cos(α))*r*g/(cos(α)-μ*sin(α)))
