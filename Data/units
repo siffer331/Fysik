@@ -1,6 +1,8 @@
 [constants]
 g = 9.82 m/s^2
 PI = 3.14159 1
+e_0 = 8.8541e-12 C^2/N*m^2
+G = 6.67261e-11 m^3/kg*s^2
 
 [length]
 m

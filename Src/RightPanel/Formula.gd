@@ -4,8 +4,9 @@ extends VBoxContainer
 func init(formula: String) -> void:
 	name = formula
 	$Label.text = formula
-	var texture = load("res://Data/Formulas/" + formula + ".png")
-	if texture:
+	var path := "res://Data/Formulas/" + formula + ".png"
+	if Directory.new().file_exists(path):
+		var texture = load(path)
 		$Texture.texture = texture
 		var aspect = texture.get_height()*1.0/texture.get_width()
 		$Texture.rect_min_size.y = $Texture.rect_size.x*aspect

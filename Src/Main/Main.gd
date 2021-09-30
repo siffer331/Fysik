@@ -38,10 +38,9 @@ func _get_units() -> void:
 	var categories = _get_data("units")
 	for line in categories["constants"]:
 		line = line.split(" ")
-		Data.constants[line[0]] = [num(line[2]), line[3]]
-	categories.erase("constants")
+		Data.constants[line[0]] = Value.new(line[2])
 	for category in categories:
-		if category == "derived":
+		if category in ["derived", "constants"]:
 			continue
 		Data.categories[category] = []
 		for line in categories[category]:
@@ -59,6 +58,11 @@ func _get_units() -> void:
 	for line in categories["derived"]:
 		line = line.split(" = ")
 		Data.derived[line[0]] = Unit.new(line[1])
+	Data.constants.clear()
+	for line in categories["constants"]:
+		line = line.split(" ")
+		Data.constants[line[0]] = Value.new(line[2], "["+line[3]+"]")
+		Data.constants[line[0]]
 
 
 func _get_symbols() -> void:
@@ -93,5 +97,5 @@ func num(s: String) -> float:
 		if part.is_valid_float():
 			res *= float(part)
 		elif part in Data.constants:
-			res *= Data.constants[part][0]
+			res *= Data.constants[part].get_value()
 	return res

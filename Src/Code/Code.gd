@@ -175,9 +175,7 @@ func eval(line: String) -> Array:
 				if parts[index][0] in Data.variables:
 					parts[index] = [Data.variables[parts[index][0]], TYPES.VALUE]
 				elif parts[index][0] in Data.constants:
-					var constant = Data.constants[parts[index][0]]
-					var unit = "[" + constant[1] + "]"
-					parts[index] = [Value.new(constant[0], unit), TYPES.VALUE]
+					parts[index] = [Data.constants[parts[index][0]], TYPES.VALUE]
 				else:
 					return ["/Cant find variable " + parts[index][0]]
 		index += 1
@@ -250,11 +248,11 @@ func command(command: String, raw_args: String) -> Array:
 		var type = arg_1_parts[0][0][0]
 		args.remove(0)
 		for arg in args:
-			if len(arg.split(":")) != 2:
+			if len(arg.split("=")) != 2:
 				return ["error", "/Invalid arg {arg} in {formula}".format(
 					{"arg": arg, "formula": command}
 				)]
-			arg = arg.split(":")
+			arg = arg.split("=")
 			var parts = _get_parts(arg[0])
 			if len(parts) > 1:
 				return ["error", "/Invalid keyword {keyword} in {formula}".format(

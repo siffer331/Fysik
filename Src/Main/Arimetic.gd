@@ -92,12 +92,11 @@ static func multiply_v(a: Value, b: Value) -> Value:
 static func power(a: Value, b: Value):
 	if not UA.equals(b.unit, Unit.new('1')):
 		return "exponent has a unit"
-	var val = pow(a.value,b.value*pow(10,b.p))
+	var val = pow(a.value,b.get_value())
 	var res := Value.new(str(val))
-	res.p += a.p*b.value*pow(10,b.p)
+	res.p += a.p*b.get_value()
 	for u in a.unit.units:
-		res.unit.units[u] = a.unit.units[u]*b.value*pow(10,b.p)
-	print(res.value, " ", val, " ", res.p)
+		res.unit.units[u] = a.unit.units[u]*b.get_value()
 	res.simplify()
 	return res
 

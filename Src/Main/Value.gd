@@ -19,6 +19,10 @@ func _init(value: String, unit := "[]"):
 	simplify()
 
 
+func get_value() -> float:
+	return value*pow(10,p)
+
+
 func simplify() -> void:
 	var dif = p%3
 	p -= dif

@@ -22,6 +22,7 @@ func to(args: Array, code: Code) -> Array:
 		return ["error", "the units are no the same"]
 	value.value /= factor
 	value.unit = unit
+	value.simplify()
 	return [[value, Code.TYPES.VALUE]]
 
 
