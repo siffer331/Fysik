@@ -42,8 +42,12 @@ func _to_string() -> String:
 			return str(value) + " " + derived
 	var unit_string = " " + str(unit)
 	var pow_string = "*10^"+str(p)
+	var f := 1.0
 	if p == 0:
+		pow_string = ""
+	if p == -3:
+		f = 0.001
 		pow_string = ""
 	if unit_string == " 1":
 		unit_string = ""
-	return str(value) + pow_string + unit_string
+	return str(value*f) + pow_string + unit_string
