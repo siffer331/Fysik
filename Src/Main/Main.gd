@@ -73,7 +73,7 @@ func _get_symbols() -> void:
 
 func _get_data(data_name: String) -> Dictionary:
 	var file := File.new()
-	file.open("res://Data/"+data_name, File.READ)
+	file.open("res://Data/"+data_name+".config", File.READ)
 	var content := file.get_as_text()
 	file.close()
 	var res := {}
