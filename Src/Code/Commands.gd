@@ -7,7 +7,7 @@ func dealloc(args: Array, code: Code) -> Array:
 	if not args[0] in Data.variables:
 		return ["error", "variable does not excist"]
 	Data.variables.erase(args[0])
-	return [["", Code.TYPES.EMPTY]]
+	return [[["Succesfull", ["", Code.TYPES.EMPTY]], Code.TYPES.SUCCESS]]
 
 
 func to(args: Array, code: Code) -> Array:
@@ -64,7 +64,11 @@ func sqrt(args: Array, code: Code) -> Array:
 	if len(res) == 1:
 		return ["error", res[0]]
 	var value = res[1][0]
+	if value.p%2 == 1:
+		value.value *= 10
 	value.value = sqrt(value.value)
+	value.p = sign(value.p)*int(abs(value.p/2))
+	value.simplify()
 	for unit in value.unit.units:
 		value.unit.units[unit] /= 2
 	return [[value, Code.TYPES.VALUE]]
@@ -76,6 +80,44 @@ func sq(args: Array, code: Code) -> Array:
 		return ["error", res[0]]
 	var value = res[1][0]
 	value.value = value.value*value.value
+	value.p *= 2
+	value.simplify()
 	for unit in value.unit.units:
 		value.unit.units[unit] *= 2
 	return [[value, Code.TYPES.VALUE]]
+
+
+func find(args: Array, code: Code) -> Array:
+	var found := {}
+	var order := []
+	var target: String = args[0]
+	for v in Data.variables:
+		found[v] = v
+	var changed := true
+	while changed:
+		changed = false
+		for formula in Data.formulas:
+			var count := 0
+			for v in Data.formulas[formula].versions:
+				if v in found:
+					count += 1
+			if count == len(Data.formulas[formula].versions)-1:
+				changed = true
+				for v in Data.formulas[formula].versions:
+					if not v in found:
+						found[v] = Data.formulas[formula].versions[v]
+						order.append(v)
+		if target in found:
+			break
+	var res := ""
+	if target in found:
+		var calc := target
+		order.invert()
+		for v in order:
+			calc = calc.replace(v, "("+found[v]+")")
+		var evaled := code.eval(calc)
+		print(evaled)
+		res = target + " has been found to be " + str(evaled[1][0])
+	else:
+		return ["error", "Can not find " + target]
+	return [[[res, ["", Code.TYPES.EMPTY]], Code.TYPES.SUCCESS]]

@@ -18,20 +18,20 @@ func _init():
 	print("Symbols:")
 	print(Data.symbols)
 	print("Formulas")
-	print(Data.formluas)
+	print(Data.formulas)
 
 
 func _get_formulas() -> void:
 	var formulas = _get_data("formulas")
 	for formula in formulas:
-		Data.formluas[formula] = {"categories": [], "versions": {}}
+		Data.formulas[formula] = {"categories": [], "versions": {}}
 		for line in formulas[formula]:
 			if line[0] == "#":
 				line.erase(0,1)
-				Data.formluas[formula].categories.append(line)
+				Data.formulas[formula].categories.append(line)
 			else:
 				var sides = line.split("=")
-				Data.formluas[formula].versions[sides[0]] = sides[1]
+				Data.formulas[formula].versions[sides[0]] = sides[1]
 
 
 func _get_units() -> void:

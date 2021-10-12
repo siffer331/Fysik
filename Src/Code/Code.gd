@@ -31,9 +31,13 @@ const COMMANDS = {
 		"return": "Value",
 		"args": 1,
 	},
+	"find" : {
+		"return": "Value",
+		"args": 1,
+	},
 }
 
-enum TYPES{EMPTY = -2, WORD = -1, OPERATION, VALUE, EQUALS, PARENTHETHIES, UNIT}
+enum TYPES{EMPTY = -2, WORD = -1, OPERATION, VALUE, EQUALS, PARENTHETHIES, UNIT, SUCCESS}
 
 export var code_path: NodePath
 
@@ -52,7 +56,7 @@ func _ready() -> void:
 	code.add_color_region("[", "]", Color(.4,.5,.8))
 	for constant in Data.constants:
 		code.add_keyword_color(constant, Color(.7,.7,.9))
-	for formula in Data.formluas:
+	for formula in Data.formulas:
 		code.add_keyword_color(formula, Color(.7,.5,.9))
 	for command in COMMANDS:
 		code.add_keyword_color(command, Color(.3,.7,.7))
@@ -110,7 +114,10 @@ func _get_parts(line: String) -> Array:
 					c_type = i
 					break
 		if len(part) > 0:
-			if (part[len(part)-1] == "1" and c == "e") or (part[len(part)-1] == "e" and c == "-"):
+			if type == TYPES.VALUE and (
+				(part[len(part)-1] == "1" and c == "e") or
+				(part[len(part)-1] == "e" and c == "-")
+			):
 				c_type = TYPES.VALUE
 		if type == TYPES.WORD and c_type == TYPES.VALUE:
 			c_type = TYPES.WORD
@@ -158,7 +165,7 @@ func eval(line: String) -> Array:
 			index += 1
 		if parts[index][1] == TYPES.WORD:
 			if index != len(parts) - 1 and parts[index+1][1] == TYPES.PARENTHETHIES:
-				if parts[index][0] in COMMANDS or parts[index][0] in Data.formluas:
+				if parts[index][0] in COMMANDS or parts[index][0] in Data.formulas:
 					var args = parts[index+1][0].substr(1,len(parts[index+1][0])-2)
 					var res = command(parts[index][0], args)
 					if res[0] is String and res[0] == "error":
@@ -168,6 +175,8 @@ func eval(line: String) -> Array:
 						if res[0][1] == TYPES.EMPTY:
 							parts.remove(index)
 							continue
+						if res[0][1] == TYPES.SUCCESS:
+							return res[0][0]
 						parts[index] = res[0]
 				else:
 					return ["/Cant find command " + parts[index][0]]
@@ -234,48 +243,51 @@ func operate(parts: Array, operation: String) -> String:
 	return ""
 
 
-func command(command: String, raw_args: String) -> Array:
-	if command in Data.formluas:
-		var args := raw_args.split(",")
-		if raw_args == "":
-			return ["error", "/Missing arguments in " + command]
-		var replace := {}
-		var arg_1_parts = _get_parts(args[0])
-		if len(arg_1_parts) > 1:
-			return ["error", "/Invalid keyword {keyword} in {formula}".format(
-				{"keyword": args[0], "formula": command}
+func formula(command: String, raw_args: String) -> Array:
+	var args := raw_args.split(",")
+	if raw_args == "":
+		return ["error", "/Missing arguments in " + command]
+	var replace := {}
+	var arg_1_parts = _get_parts(args[0])
+	if len(arg_1_parts) > 1:
+		return ["error", "/Invalid keyword {keyword} in {formula}".format(
+			{"keyword": args[0], "formula": command}
+		)]
+	var type = arg_1_parts[0][0][0]
+	args.remove(0)
+	for arg in args:
+		if len(arg.split("=")) != 2:
+			return ["error", "/Invalid arg {arg} in {formula}".format(
+				{"arg": arg, "formula": command}
 			)]
-		var type = arg_1_parts[0][0][0]
-		args.remove(0)
-		for arg in args:
-			if len(arg.split("=")) != 2:
-				return ["error", "/Invalid arg {arg} in {formula}".format(
-					{"arg": arg, "formula": command}
-				)]
-			arg = arg.split("=")
-			var parts = _get_parts(arg[0])
-			if len(parts) > 1:
-				return ["error", "/Invalid keyword {keyword} in {formula}".format(
-					{"keyword": arg[0], "formula": command}
-				)]
-			var keyword = parts[0][0][0]
-			replace[keyword] = arg[1]
-		if not type in Data.formluas[command]["versions"]:
-			return ["error", "/Cant get " + type]
-		var formula: String = Data.formluas[command]["versions"][type]
-		for arg in replace:
-			formula = formula.replace(arg, "("+replace[arg]+")")
-		var res = eval(formula)
-		if len(res) == 1:
-			return ["error", res[0]]
-		return [res[1]]
+		arg = arg.split("=")
+		var parts = _get_parts(arg[0])
+		if len(parts) > 1:
+			return ["error", "/Invalid keyword {keyword} in {formula}".format(
+				{"keyword": arg[0], "formula": command}
+			)]
+		var keyword = parts[0][0][0]
+		replace[keyword] = arg[1]
+	if not type in Data.formulas[command]["versions"]:
+		return ["error", "/Cant get " + type]
+	var formula: String = Data.formulas[command]["versions"][type]
+	for arg in replace:
+		formula = formula.replace(arg, "("+replace[arg]+")")
+	var res = eval(formula)
+	if len(res) == 1:
+		return ["error", res[0]]
+	return [res[1]]
+
+
+func command(command: String, raw_args: String) -> Array:
+	if command in Data.formulas:
+		return formula(command, raw_args)
 	if COMMANDS[command].args > 0 and raw_args == "":
 		return ["error", "no input recieved"]
 	var args := raw_args.split(",")
 	if len(args) != COMMANDS[command].args:
 		return ["error", "wrong number of args"]
 	return Commands.call(command, args, self)
-	return [["", TYPES.EMPTY]]
 
 
 func _on_TextEdit_text_changed() -> void:

@@ -12,7 +12,7 @@ var constants := {}
 var si := []
 var categories := {}
 var symbols := {}
-var formluas := {}
+var formulas := {}
 
 #dynamic
 var variables := {}

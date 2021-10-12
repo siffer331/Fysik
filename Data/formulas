@@ -40,3 +40,9 @@ C=e_0*A/d
 d=e_0*A/C
 A=C*d/e_0
 
+[OhmsLaw]
+#electric fields
+U=R*I
+R=U/I
+I=U/R
+

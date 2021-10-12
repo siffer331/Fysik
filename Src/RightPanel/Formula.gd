@@ -11,7 +11,7 @@ func init(formula: String) -> void:
 		var aspect = texture.get_height()*1.0/texture.get_width()
 		$Texture.rect_min_size.y = $Texture.rect_size.x*aspect
 	var tool_tip := ""
-	for categori in Data.formluas[formula].categories:
+	for categori in Data.formulas[formula].categories:
 		tool_tip += categori + ", "
 	tool_tip.erase(len(tool_tip)-2,2)
 	$Label.hint_tooltip = tool_tip
