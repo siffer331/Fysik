@@ -217,10 +217,16 @@ func operate(parts: Array, operation: String) -> String:
 	var i = 0
 	while i < len(parts):
 		if parts[i][1] == 0 and parts[i][0] == operation:
-			if parts[i-1][1] != 1:
-				return "/Cant convert '{part}' to a number".format({"part":parts[i-1][0]})
 			if parts[i+1][1] != 1:
 				return "/Cant convert '{part}' to a number".format({"part":parts[i+1][0]})
+			if i == 0:
+				if operation == "-":
+					parts[1][0] = A.multiply_v(Value.new("-1"),parts[1][0])
+					parts.remove(0)
+					continue
+				return "/cant operate on nothing"
+			if parts[i-1][1] != 1:
+				return "/Cant convert '{part}' to a number".format({"part":parts[i-1][0]})
 			match(operation):
 				'^':
 					parts[i][0] = A.power(parts[i-1][0],parts[i+1][0])
@@ -231,6 +237,7 @@ func operate(parts: Array, operation: String) -> String:
 				'+':
 					parts[i][0] = A.add(parts[i-1][0],parts[i+1][0])
 				'-':
+					print(parts)
 					parts[i][0] = A.subtract(parts[i-1][0],parts[i+1][0])
 			if parts[i][0] is String:
 				return parts[i][0]

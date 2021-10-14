@@ -118,6 +118,6 @@ func find(args: Array, code: Code) -> Array:
 		var evaled := code.eval(calc)
 		print(evaled)
 		res = target + " has been found to be " + str(evaled[1][0])
+		return [[evaled[1][0], Code.TYPES.VALUE]]
 	else:
 		return ["error", "Can not find " + target]
-	return [[[res, ["", Code.TYPES.EMPTY]], Code.TYPES.SUCCESS]]
