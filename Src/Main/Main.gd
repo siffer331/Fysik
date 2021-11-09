@@ -43,21 +43,24 @@ func _get_units() -> void:
 		if category in ["derived", "constants"]:
 			continue
 		Data.categories[category] = []
-		for line in categories[category]:
-			line = line.split(" ")
-			if len(line) == 1:
+		for i in range(len(categories[category])):
+			var line: Array = categories[category][i].split(" ")
+			if i == 0:
 				Data.categories[category].append(line[0])
 				Data.units[line[0]] = [1, line[0]]
 				Data.si.append(line[0])
-				continue
-			Data.categories[category].append(line[1])
-			Data.units[line[1]] = [
-				num(line[3])*Data.units[line[4]][0]/num(line[0]),
-				Data.units[line[4]][1]
-			]
+			elif i == 1:
+				Data.scaleable.append(line[0])
+			else:
+				Data.categories[category].append(line[1])
+				Data.units[line[1]] = [
+					num(line[3])*Data.units[line[4]][0]/num(line[0]),
+					Data.units[line[4]][1]
+				]
 	for line in categories["derived"]:
 		line = line.split(" = ")
 		Data.derived[line[0]] = Unit.new(line[1])
+		Data.scaleable.append(line[0])
 	Data.constants.clear()
 	for line in categories["constants"]:
 		line = line.split(" ")

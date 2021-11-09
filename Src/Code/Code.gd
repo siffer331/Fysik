@@ -35,6 +35,10 @@ const COMMANDS = {
 		"return": "Value",
 		"args": 1,
 	},
+	"reset" : {
+		"return": "null",
+		"args": 0,
+	}
 }
 
 enum TYPES{EMPTY = -2, WORD = -1, OPERATION, VALUE, EQUALS, PARENTHETHIES, UNIT, SUCCESS}
@@ -64,31 +68,10 @@ func _ready() -> void:
 
 func _input(event: InputEvent) -> void:
 	code = code as TextEdit
+	if event.is_action_pressed("run"):
+		run_all()
 	if event.is_action_pressed("run line"):
-		undo = true
-		var line_num = code.cursor_get_line()
-		var line = code.get_line(line_num)
-		if line != "" and (not line[0] in "#%") and line.substr(0,2) != "//":
-			var res = eval(line)
-			code.cursor_set_column(len(line))
-			if (
-				line_num < code.get_line_count()-1 and
-				code.get_line(line_num+1).substr(0,2) == "//"
-			):
-				var index = 0
-				var lines = -2
-				for line_a in code.text.split("\n"):
-					lines += 1
-					if lines == line_num:
-						break
-					index += len(line_a) + 1
-				var temp := code.text
-				temp.erase(index, len(code.get_line(line_num+1))+1)
-				code.text = temp
-				code.cursor_set_line(line_num)
-				code.cursor_set_column(len(line))
-			if line[len(line)-1] != ":":
-				code.insert_text_at_cursor("\n//" + res[0])
+		run_line()
 
 
 func _get_parts(line: String) -> Array:
@@ -217,6 +200,8 @@ func operate(parts: Array, operation: String) -> String:
 	var i = 0
 	while i < len(parts):
 		if parts[i][1] == 0 and parts[i][0] == operation:
+			if len(parts) == i+1:
+				return "/cant operate on nothing"
 			if parts[i+1][1] != 1:
 				return "/Cant convert '{part}' to a number".format({"part":parts[i+1][0]})
 			if i == 0:
@@ -237,7 +222,6 @@ func operate(parts: Array, operation: String) -> String:
 				'+':
 					parts[i][0] = A.add(parts[i-1][0],parts[i+1][0])
 				'-':
-					print(parts)
 					parts[i][0] = A.subtract(parts[i-1][0],parts[i+1][0])
 			if parts[i][0] is String:
 				return parts[i][0]
@@ -292,9 +276,50 @@ func command(command: String, raw_args: String) -> Array:
 	if COMMANDS[command].args > 0 and raw_args == "":
 		return ["error", "no input recieved"]
 	var args := raw_args.split(",")
-	if len(args) != COMMANDS[command].args:
+	var num = len(args)
+	if raw_args == "":
+		num = 0
+	if num != COMMANDS[command].args:
 		return ["error", "wrong number of args"]
 	return Commands.call(command, args, self)
+
+
+func run_all() -> void:
+	var i := 0
+	TextEdit
+	while i < code.get_line_count():
+		code = code as TextEdit
+		code.cursor_set_line(i)
+		run_line()
+		i += 1
+	undo = false
+
+
+func run_line() -> void:
+	undo = true
+	var line_num = code.cursor_get_line()
+	var line = code.get_line(line_num)
+	if line != "" and (not line[0] in "#%") and line.substr(0,2) != "//":
+		var res = eval(line)
+		code.cursor_set_column(len(line))
+		if (
+			line_num < code.get_line_count()-1 and
+			code.get_line(line_num+1).substr(0,2) == "//"
+		):
+			var index = 0
+			var lines = -2
+			for line_a in code.text.split("\n"):
+				lines += 1
+				if lines == line_num:
+					break
+				index += len(line_a) + 1
+			var temp := code.text
+			temp.erase(index, len(code.get_line(line_num+1))+1)
+			code.text = temp
+			code.cursor_set_line(line_num)
+			code.cursor_set_column(len(line))
+		if line[len(line)-1] != ":":
+			code.insert_text_at_cursor("\n//" + res[0])
 
 
 func _on_TextEdit_text_changed() -> void:
@@ -305,3 +330,7 @@ func _on_TextEdit_text_changed() -> void:
 
 func _on_Data_write(text: String) -> void:
 	code.insert_text_at_cursor(text)
+
+
+func _on_Run_pressed() -> void:
+	run_all()

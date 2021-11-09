@@ -15,7 +15,9 @@ func _init(value: String, unit := "[]"):
 		p = int(parts[1])
 	self.unit = Unit.new(unit.substr(1,len(unit)-2))
 	self.unit = UA.derive(self.unit)
-	self.value *= self.unit.convert_to_si()
+	var factor: Array = self.unit.convert_to_si()
+	self.value *= factor[0]
+	p += factor[1]
 	simplify()
 
 
@@ -37,10 +39,7 @@ func simplify() -> void:
 
 
 func _to_string() -> String:
-	for derived in Data.derived:
-		if UA.equals(Data.derived[derived], unit):
-			return str(value) + " " + derived
-	var unit_string = " " + str(unit)
+	var unit_string = " " + str(UA.get_readable(unit))
 	var pow_string = "*10^"+str(p)
 	var f := 1.0
 	if p == 0:

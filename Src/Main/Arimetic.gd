@@ -2,32 +2,6 @@ class_name A
 extends Node
 
 
-static func multiply_u(a: Unit, b: Unit) -> Unit:
-	var res := Unit.new()
-	for part in a.units:
-		if not part in res.units:
-			res.units[part] = 0
-		res.units[part] += a.units[part]
-	for part in b.units:
-		if not part in res.units:
-			res.units[part] = 0
-		res.units[part] += b.units[part]
-	res._simplify()
-	return res
-
-
-static func divide_u(a: Unit, b: Unit) -> Unit:
-	return multiply_u(a, inverse(b))
-
-
-static func inverse(a: Unit) -> Unit:
-	var res = Unit.new()
-	res.units = a.units.duplicate()
-	for part in res.units:
-		res.units[part] *= -1
-	return res
-
-
 static func copy(a: Unit) -> Unit:
 	var res = Unit.new()
 	res.units = a.units.duplicate()
@@ -76,7 +50,7 @@ static func divide_v(a: Value, b: Value):
 		return "/Cant divide with 0"
 	var res = Value.new(str(a.value/b.value))
 	res.p += a.p-b.p
-	res.unit = divide_u(a.unit, b.unit)
+	res.unit = UA.divide_u(a.unit, b.unit)
 	res.simplify()
 	return res
 
@@ -84,7 +58,7 @@ static func divide_v(a: Value, b: Value):
 static func multiply_v(a: Value, b: Value) -> Value:
 	var res = Value.new(str(a.value*b.value))
 	res.p += a.p+b.p
-	res.unit = multiply_u(a.unit, b.unit)
+	res.unit = UA.multiply_u(a.unit, b.unit)
 	res.simplify()
 	return res
 

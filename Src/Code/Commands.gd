@@ -7,6 +7,13 @@ func dealloc(args: Array, code: Code) -> Array:
 	if not args[0] in Data.variables:
 		return ["error", "variable does not excist"]
 	Data.variables.erase(args[0])
+	Data.emit_signal("variable_changed")
+	return [[["Succesfull", ["", Code.TYPES.EMPTY]], Code.TYPES.SUCCESS]]
+
+
+func reset(args: Array, code: Code) -> Array:
+	Data.variables.clear()
+	Data.emit_signal("variable_changed")
 	return [[["Succesfull", ["", Code.TYPES.EMPTY]], Code.TYPES.SUCCESS]]
 
 
@@ -20,7 +27,8 @@ func to(args: Array, code: Code) -> Array:
 	var value := A.copy_value(res[1][0])
 	if not UA.equals(value.unit, si):
 		return ["error", "the units are no the same"]
-	value.value /= factor
+	value.value /= factor[0]
+	value.p -= factor[1]
 	value.unit = unit
 	value.simplify()
 	return [[value, Code.TYPES.VALUE]]
@@ -116,7 +124,6 @@ func find(args: Array, code: Code) -> Array:
 		for v in order:
 			calc = calc.replace(v, "("+found[v]+")")
 		var evaled := code.eval(calc)
-		print(evaled)
 		res = target + " has been found to be " + str(evaled[1][0])
 		return [[evaled[1][0], Code.TYPES.VALUE]]
 	else:
