@@ -124,7 +124,7 @@ func _get_parts(line: String) -> Array:
 	return [parts]
 
 
-func eval(line: String) -> Array:
+func eval(line: String, save := false) -> Array:
 	var parts = _get_parts(line)
 	if parts[0] is String and parts[0] == "error":
 		return [parts[1]]
@@ -155,7 +155,7 @@ func eval(line: String) -> Array:
 			if index != len(parts) - 1 and parts[index+1][1] == TYPES.PARENTHETHIES:
 				if parts[index][0] in COMMANDS or parts[index][0] in Data.formulas:
 					var args = parts[index+1][0].substr(1,len(parts[index+1][0])-2)
-					var res = command(parts[index][0], args)
+					var res = command(parts[index][0], args, save)
 					if res[0] is String and res[0] == "error":
 						return [res[1]]
 					else:
@@ -197,6 +197,9 @@ func eval(line: String) -> Array:
 			return ["/Cant set variable to " + parts[2][0]]
 		Data.set_variable(parts[0][0], parts[2][0])
 		code.add_keyword_color(parts[0][0], Color(.7,.9,.7))
+		Data.exported.append("")
+		if save:
+			Data.exported.append("$"+parts[0][0]+"="+parts[2][0].to_latex()+"$")
 		return [parts[0][0] + " has been set to " + str(parts[2][0]), parts[2][0]]
 	if len(parts) == 0:
 		return ["Succesfull", ["", TYPES.EMPTY]]
@@ -241,7 +244,7 @@ func operate(parts: Array, operation: String) -> String:
 	return ""
 
 
-func formula(command: String, raw_args: String) -> Array:
+func formula(command: String, raw_args: String, save := false) -> Array:
 	var args := raw_args.split(",")
 	if raw_args == "":
 		return ["error", "/Missing arguments in " + command]
@@ -274,12 +277,19 @@ func formula(command: String, raw_args: String) -> Array:
 	var res = eval(formula)
 	if len(res) == 1:
 		return ["error", res[0]]
+	if save:
+		Data.exported.append("$"+equation_to_latex(Data.formulas[command]["versions"][type])+"$")
+		Data.exported.append("$"+res[0][0]+"="+res[2][0].to_latex()+"$")
 	return [res[1]]
 
 
-func command(command: String, raw_args: String) -> Array:
+static func equation_to_latex(equation: String) -> String:
+	return ""
+
+
+func command(command: String, raw_args: String, save := false) -> Array:
 	if command in Data.formulas:
-		return formula(command, raw_args)
+		return formula(command, raw_args, save)
 	if COMMANDS[command].args > 0 and raw_args == "":
 		return ["error", "no input recieved"]
 	var args := raw_args.split(",")
@@ -288,7 +298,7 @@ func command(command: String, raw_args: String) -> Array:
 		num = 0
 	if num != COMMANDS[command].args:
 		return ["error", "wrong number of args"]
-	return Commands.call(command, args, self)
+	return Commands.call(command, args, self, save)
 
 
 func run_all() -> void:
@@ -312,7 +322,7 @@ func run_line() -> void:
 		if line[0] == "%":
 			Data.exported.append(line.substr(1,-1))
 	if line != "" and (not line[0] in "#%") and line.substr(0,2) != "//":
-		var res = eval(line)
+		var res = eval(line, exporting)
 		code.cursor_set_column(len(line))
 		if (
 			line_num < code.get_line_count()-1 and

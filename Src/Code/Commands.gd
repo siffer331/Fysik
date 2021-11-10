@@ -3,7 +3,7 @@ extends Node
 
 #return ["error", "/oh no"]
 
-func dealloc(args: Array, code: Code) -> Array:
+func dealloc(args: Array, code: Code, exporting := false) -> Array:
 	if not args[0] in Data.variables:
 		return ["error", "variable does not excist"]
 	Data.variables.erase(args[0])
@@ -11,13 +11,13 @@ func dealloc(args: Array, code: Code) -> Array:
 	return [[["Succesfull", ["", Code.TYPES.EMPTY]], Code.TYPES.SUCCESS]]
 
 
-func reset(args: Array, code: Code) -> Array:
+func reset(args: Array, code: Code, exporting := false) -> Array:
 	Data.variables.clear()
 	Data.emit_signal("variable_changed")
 	return [[["Succesfull", ["", Code.TYPES.EMPTY]], Code.TYPES.SUCCESS]]
 
 
-func to(args: Array, code: Code) -> Array:
+func to(args: Array, code: Code, exporting := false) -> Array:
 	var unit := Unit.new(args[1])
 	var si := A.copy(unit)
 	var factor := si.convert_to_si() 
@@ -31,10 +31,12 @@ func to(args: Array, code: Code) -> Array:
 	value.p -= factor[1]
 	value.unit = unit
 	value.simplify()
+	if exporting:
+		Data.exported.append("$"+res[1][0].to_latex()+"="+value.to_latex()+"$")
 	return [[value, Code.TYPES.VALUE]]
 
 
-func sin(args: Array, code: Code) -> Array:
+func sin(args: Array, code: Code, exporting := false) -> Array:
 	var res := code.eval(args[0])
 	if len(res) == 1:
 		return ["error", res[0]]
@@ -56,7 +58,7 @@ func tan(args: Array, code: Code) -> Array:
 	return [[value, Code.TYPES.VALUE]]
 
 
-func cos(args: Array, code: Code) -> Array:
+func cos(args: Array, code: Code, exporting := false) -> Array:
 	var res := code.eval(args[0])
 	if len(res) == 1:
 		return ["error", res[0]]
@@ -67,7 +69,7 @@ func cos(args: Array, code: Code) -> Array:
 	return [[value, Code.TYPES.VALUE]]
 
 
-func sqrt(args: Array, code: Code) -> Array:
+func sqrt(args: Array, code: Code, exporting := false) -> Array:
 	var res = code.eval(args[0])
 	if len(res) == 1:
 		return ["error", res[0]]
@@ -82,7 +84,7 @@ func sqrt(args: Array, code: Code) -> Array:
 	return [[value, Code.TYPES.VALUE]]
 
 
-func sq(args: Array, code: Code) -> Array:
+func sq(args: Array, code: Code, exporting := false) -> Array:
 	var res = code.eval(args[0])
 	if len(res) == 1:
 		return ["error", res[0]]
@@ -95,7 +97,7 @@ func sq(args: Array, code: Code) -> Array:
 	return [[value, Code.TYPES.VALUE]]
 
 
-func ln(args: Array, code: Code) -> Array:
+func ln(args: Array, code: Code, exporting := false) -> Array:
 	var res = code.eval(args[0])
 	if len(res) == 1:
 		return ["error", res[0]]
@@ -108,7 +110,7 @@ func ln(args: Array, code: Code) -> Array:
 	return [[value, Code.TYPES.VALUE]]
 
 
-func find(args: Array, code: Code) -> Array:
+func find(args: Array, code: Code, exporting := false) -> Array:
 	var found := {}
 	var order := []
 	var target: String = args[0]
@@ -136,8 +138,14 @@ func find(args: Array, code: Code) -> Array:
 	if target in found:
 		var calc := target
 		order.invert()
+		var used := []
 		for v in order:
+			if v in calc:
+				used.append(v)
 			calc = calc.replace(v, "("+found[v]+")")
+		used.invert()
+		for v in used:
+			pass
 		var evaled := code.eval(calc)
 		res = target + " has been found to be " + str(evaled[1][0])
 		Data.defaults.clear()

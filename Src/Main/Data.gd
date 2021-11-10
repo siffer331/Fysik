@@ -2,6 +2,8 @@ extends Node
 
 signal variable_changed()
 
+const characters := ["π", "Ω", "μ", "τ", "ε"]
+const latex_characters := {"π": "\\pi", "Ω": "\\O", "μ": "\\mu", "τ": "\\t", "ε": "\\e"}
 const prefixes := {
 	'Y': 24,
 	'Z': 21,
@@ -37,7 +39,6 @@ var categories := {}
 var symbols := {}
 var scaleable := []
 var formulas := {}
-var characters := ["π", "Ω", "μ", "τ", "ε"]
 var derived_order := []
 var exported := []
 

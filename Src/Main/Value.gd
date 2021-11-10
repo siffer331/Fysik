@@ -21,6 +21,10 @@ func _init(value: String, unit := "[]"):
 	simplify()
 
 
+func to_latex() -> String:
+	return ""
+
+
 func get_value() -> float:
 	return value*pow(10,p)
 
