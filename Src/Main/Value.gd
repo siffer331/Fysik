@@ -22,7 +22,41 @@ func _init(value: String, unit := "[]"):
 
 
 func to_latex() -> String:
-	return ""
+	var res := str(value)
+	if p != 0:
+		res += "\\cdot10^{"+str(p)+"}"
+	var u := UA.get_readable(unit)
+	var top := []
+	var bottom := []
+	for part in u.units:
+		if u.units[part] < 0:
+			if u.units[part] != -1:
+				bottom.append("\\text{"+part+"}^{"+str(-u.units[part])+"}")
+			else:
+				bottom.append("\\text{"+part+"}")
+		else:
+			if u.units[part] != 1:
+				top.append("\\text{"+part+"}^{"+str(u.units[part])+"}")
+			else:
+				top.append("\\text{"+part+"}")
+	var unit_string := ""
+	if len(top) == 0:
+		unit_string = "1"
+	else:
+		for i in range(len(top)):
+			unit_string += top[i]
+			if i < len(top)-1:
+				unit_string += "\\cdot"
+	if len(bottom) > 0:
+		unit_string = "\\frac{"+unit_string+"}{"
+		for i in range(len(bottom)):
+			unit_string += bottom[i]
+			if i < len(bottom)-1:
+				unit_string += "\\cdot"
+		unit_string += "}"
+	if unit_string == "1":
+		unit_string = ""
+	return res+unit_string
 
 
 func get_value() -> float:

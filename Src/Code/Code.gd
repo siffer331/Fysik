@@ -75,11 +75,13 @@ func _input(event: InputEvent) -> void:
 	code = code as TextEdit
 	if event.is_action_pressed("run"):
 		run_all()
-	if event.is_action_pressed("run line"):
+	if event.is_action_pressed("run_line"):
 		run_line()
+	if event.is_action_pressed("export"):
+		export_md()
 
 
-func _get_parts(line: String) -> Array:
+static func _get_parts(line: String) -> Array:
 	var parts := []
 	var part = ""
 	var type = TYPES.EMPTY
@@ -283,8 +285,47 @@ func formula(command: String, raw_args: String, save := false) -> Array:
 	return [res[1]]
 
 
-static func equation_to_latex(equation: String) -> String:
-	return ""
+static func equation_to_latex(equation: String, debug := false) -> String:
+	var parts:Array = _get_parts(equation)[0]
+	if debug:
+		print(parts)
+	for part in parts:
+		if part[1] == TYPES.PARENTHETHIES:
+			part[0] = "("+equation_to_latex(part[0].substr(1,len(part[0])-2))+")"
+	var curl := false
+	if debug:
+		print(parts)
+	for part in parts:
+		if curl:
+			if part[1] == TYPES.PARENTHETHIES:
+				part[0] = "{"+part[0].substr(1,len(part[0])-2)+"}"
+		curl = false
+		if part[0] in ["sqrt","^"]:
+			curl = true
+	if debug:
+		print(parts)
+	var i := 0
+	while i < len(parts):
+		if parts[i][0] == "*":
+			parts[i-1][0] += "\\cdot "+parts[i+1][0]
+			parts.remove(i)
+			parts.remove(i)
+			i -= 2
+		i += 1
+	i = 0
+	while i < len(parts):
+		if parts[i][0] == "/":
+			parts[i-1][0] = "\\frac{"+parts[i-1][0]+"}{"+parts[i+1][0]+"}"
+			parts.remove(i)
+			parts.remove(i)
+			i -= 2
+		i += 1
+	if debug:
+		print(parts)
+	var res := ""
+	for part in parts:
+		res += part[0]
+	return res
 
 
 func command(command: String, raw_args: String, save := false) -> Array:
@@ -303,7 +344,6 @@ func command(command: String, raw_args: String, save := false) -> Array:
 
 func run_all() -> void:
 	var i := 0
-	TextEdit
 	while i < code.get_line_count():
 		code = code as TextEdit
 		code.cursor_set_line(i)
@@ -312,15 +352,28 @@ func run_all() -> void:
 	undo = false
 
 
+func export_md() -> void:
+	exporting = true
+	Data.exported = []
+	run_all()
+	exporting = false
+	for i in range(len(Data.exported)):
+		for replace in Data.latex_characters:
+			Data.exported[i] = Data.exported[i].replace(replace, Data.latex_characters[replace])
+		print(Data.exported[i])
+	Data.emit_signal("exporting")
+
+
 func run_line() -> void:
 	undo = true
 	var line_num = code.cursor_get_line()
 	var line = code.get_line(line_num)
 	if exporting:
-		if line[0] == "#":
-			Data.exported.append("[//]: # ("+line.substr(1,-1)+")")
-		if line[0] == "%":
-			Data.exported.append(line.substr(1,-1))
+		if line != "":
+			if line[0] == "#":
+				Data.exported.append("[//]: # ("+line.substr(1,-1)+")")
+			if line[0] == "%":
+				Data.exported.append(line.substr(1,-1))
 	if line != "" and (not line[0] in "#%") and line.substr(0,2) != "//":
 		var res = eval(line, exporting)
 		code.cursor_set_column(len(line))

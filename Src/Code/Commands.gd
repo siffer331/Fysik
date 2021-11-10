@@ -136,16 +136,22 @@ func find(args: Array, code: Code, exporting := false) -> Array:
 			break
 	var res := ""
 	if target in found:
-		var calc := target
+		var calc := " "+target+" "
 		order.invert()
 		var used := []
 		for v in order:
 			if v in calc:
 				used.append(v)
-			calc = calc.replace(v, "("+found[v]+")")
+			calc = calc.replace(" "+v+" ", "("+found[v]+")")
 		used.invert()
 		for v in used:
-			pass
+			Data.exported.append("$"+v+"="+Code.equation_to_latex(found[v])+"$")
+			for u in used:
+				if u == v:
+					break
+				found[v] = found[v].replace(" "+u+" ", "("+found[u]+")")
+			var evaled := code.eval(found[v])
+			Data.exported.append("$"+v+"="+evaled[1][0].to_latex()+"$")
 		var evaled := code.eval(calc)
 		res = target + " has been found to be " + str(evaled[1][0])
 		Data.defaults.clear()

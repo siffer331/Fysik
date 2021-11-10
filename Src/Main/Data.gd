@@ -1,6 +1,7 @@
 extends Node
 
-signal variable_changed()
+signal variable_changed
+signal exporting
 
 const characters := ["π", "Ω", "μ", "τ", "ε"]
 const latex_characters := {"π": "\\pi", "Ω": "\\O", "μ": "\\mu", "τ": "\\t", "ε": "\\e"}
