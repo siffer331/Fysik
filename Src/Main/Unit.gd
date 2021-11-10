@@ -59,7 +59,7 @@ func convert_to_si() -> Array:
 	var factor := 1.0
 	var p := 0
 	for unit in units.keys():
-		if len(unit) > 1 and unit.substr(1,-1) in Data.scaleable and unit[0] in Data.prefixes:
+		if len(unit) > 1 and unit.substr(1,-1) in Data.scaleable and unit[0] in Data.prefixes and not unit in Data.si:
 			p += Data.prefixes[unit[0]]
 			var si = unit.substr(1,-1)
 			if not si in units:

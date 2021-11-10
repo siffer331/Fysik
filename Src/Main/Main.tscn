@@ -117,5 +117,4 @@ margin_left = 5.0
 margin_top = 5.0
 margin_right = 507.0
 margin_bottom = 320.0
-
 [connection signal="pressed" from="Main/ToolBar/Split/Run" to="Main/Margin/Split/Split/Code" method="_on_Run_pressed"]
