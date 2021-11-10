@@ -39,6 +39,7 @@ var scaleable := []
 var formulas := {}
 var characters := ["π", "Ω", "μ", "τ", "ε"]
 var derived_order := []
+var exported := []
 
 #dynamic
 var variables := {}

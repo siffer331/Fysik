@@ -50,6 +50,7 @@ enum TYPES{EMPTY = -2, WORD = -1, OPERATION, VALUE, EQUALS, PARENTHETHIES, UNIT,
 export var code_path: NodePath
 
 var undo := false
+var exporting := false
 
 onready var code: TextEdit = get_node(code_path)
 
@@ -305,6 +306,11 @@ func run_line() -> void:
 	undo = true
 	var line_num = code.cursor_get_line()
 	var line = code.get_line(line_num)
+	if exporting:
+		if line[0] == "#":
+			Data.exported.append("[//]: # ("+line.substr(1,-1)+")")
+		if line[0] == "%":
+			Data.exported.append(line.substr(1,-1))
 	if line != "" and (not line[0] in "#%") and line.substr(0,2) != "//":
 		var res = eval(line)
 		code.cursor_set_column(len(line))
