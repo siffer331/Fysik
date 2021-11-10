@@ -1,3 +1,4 @@
+class_name Main
 extends Control
 
 
@@ -19,16 +20,33 @@ func _init():
 	print(Data.symbols)
 	print("Formulas")
 	print(Data.formulas)
+	print("Order")
+	print(Data.derived_order)
+
+class DerivedSorter:
+	static func comparator(a: String, b: String) -> bool:
+		var a_count := 0
+		var b_count := 0
+		for unit in Data.derived[a].units:
+			a_count += abs(Data.derived[a].units[unit])
+		for unit in Data.derived[b].units:
+			b_count += abs(Data.derived[b].units[unit])
+		return a_count > b_count
 
 
 func _get_formulas() -> void:
 	var formulas = _get_data("formulas")
 	for formula in formulas:
-		Data.formulas[formula] = {"categories": [], "versions": {}}
+		Data.formulas[formula] = {"categories": [], "versions": {}, "defaults": {}}
 		for line in formulas[formula]:
 			if line[0] == "#":
 				line.erase(0,1)
 				Data.formulas[formula].categories.append(line)
+			elif line[0] == "$":
+				line.erase(0,1)
+				var sides: Array = line.split("=")
+				var parts: Array = sides[1].split(" ")
+				Data.formulas[formula].defaults[sides[0]] = Value.new(parts[0], "["+parts[1]+"]")
 			else:
 				var sides = line.split("=")
 				Data.formulas[formula].versions[sides[0]] = sides[1]
@@ -59,8 +77,10 @@ func _get_units() -> void:
 				]
 	for line in categories["derived"]:
 		line = line.split(" = ")
-		Data.derived[line[0]] = Unit.new(line[1])
+		Data.derived[line[0]] = UA.derive(Unit.new(line[1]))
 		Data.scaleable.append(line[0])
+		Data.derived_order.append(line[0])
+	Data.derived_order.sort_custom(DerivedSorter, "comparator")
 	Data.constants.clear()
 	for line in categories["constants"]:
 		line = line.split(" ")

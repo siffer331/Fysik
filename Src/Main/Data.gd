@@ -37,9 +37,12 @@ var categories := {}
 var symbols := {}
 var scaleable := []
 var formulas := {}
+var characters := ["π", "Ω", "μ", "τ", "ε"]
+var derived_order := []
 
 #dynamic
 var variables := {}
+var defaults := {}
 
 
 func set_variable(variable: String, value: Value) -> void:

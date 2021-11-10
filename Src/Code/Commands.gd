@@ -95,6 +95,19 @@ func sq(args: Array, code: Code) -> Array:
 	return [[value, Code.TYPES.VALUE]]
 
 
+func ln(args: Array, code: Code) -> Array:
+	var res = code.eval(args[0])
+	if len(res) == 1:
+		return ["error", res[0]]
+	var value = res[1][0]
+	value.value = log(value.value) + log(10)*value.p
+	value.p = 0
+	value.simplify()
+	for unit in value.unit.units:
+		value.unit.units[unit] *= 2
+	return [[value, Code.TYPES.VALUE]]
+
+
 func find(args: Array, code: Code) -> Array:
 	var found := {}
 	var order := []
@@ -107,11 +120,13 @@ func find(args: Array, code: Code) -> Array:
 		for formula in Data.formulas:
 			var count := 0
 			for v in Data.formulas[formula].versions:
-				if v in found:
+				if v in found or v in Data.formulas[formula].defaults:
 					count += 1
 			if count == len(Data.formulas[formula].versions)-1:
 				changed = true
 				for v in Data.formulas[formula].versions:
+					if v in Data.formulas[formula].defaults:
+						Data.defaults[v] = Data.formulas[formula].defaults[v]
 					if not v in found:
 						found[v] = Data.formulas[formula].versions[v]
 						order.append(v)
@@ -125,6 +140,7 @@ func find(args: Array, code: Code) -> Array:
 			calc = calc.replace(v, "("+found[v]+")")
 		var evaled := code.eval(calc)
 		res = target + " has been found to be " + str(evaled[1][0])
+		Data.defaults.clear()
 		return [[evaled[1][0], Code.TYPES.VALUE]]
 	else:
 		return ["error", "Can not find " + target]

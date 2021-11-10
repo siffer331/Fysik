@@ -31,6 +31,10 @@ const COMMANDS = {
 		"return": "Value",
 		"args": 1,
 	},
+	"ln" : {
+		"return": "Value",
+		"args": 1,
+	},
 	"find" : {
 		"return": "Value",
 		"args": 1,
@@ -166,6 +170,8 @@ func eval(line: String) -> Array:
 			else:
 				if parts[index][0] in Data.variables:
 					parts[index] = [Data.variables[parts[index][0]], TYPES.VALUE]
+				elif parts[index][0] in Data.defaults:
+					parts[index] = [Data.defaults[parts[index][0]], TYPES.VALUE]
 				elif parts[index][0] in Data.constants:
 					parts[index] = [Data.constants[parts[index][0]], TYPES.VALUE]
 				else:

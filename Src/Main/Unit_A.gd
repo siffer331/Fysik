@@ -35,7 +35,7 @@ static func equals(a: Unit, b: Unit) -> bool:
 static func get_readable(a: Unit) -> Unit:
 	var res = Unit.new()
 	res.units = a.units.duplicate(true)
-	for derived in Data.derived:
+	for derived in Data.derived_order:
 		var u = derive(Data.derived[derived])
 		while dictionary_less(u.units, res.units):
 			res = divide_u(res, u)
@@ -80,14 +80,14 @@ static func compare_dictionary(a: Dictionary, b: Dictionary) -> bool:
 
 static func derive(u: Unit) -> Unit:
 	var res := Unit.new()
+	var changed := true
 	for unit in u.units:
 		var val: int = u.units[unit]
 		if unit in Data.derived:
-			var d := derive(Data.derived[unit])
-			for unit2 in d.units:
+			for unit2 in Data.derived[unit].units:
 				if not unit2 in res.units:
 					res.units[unit2] = 0
-				res.units[unit2] += val*d.units[unit2]
+				res.units[unit2] += val*Data.derived[unit].units[unit2]
 		else:
 			if not unit in res.units:
 				res.units[unit] = 0

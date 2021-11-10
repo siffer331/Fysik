@@ -1,0 +1,157 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://Src/LeftPanel/LeftPanel.gd" type="Script" id=1]
+[ext_resource path="res://Src/Util/FillGrid.gd" type="Script" id=2]
+
+[node name="LeftPanel" type="Control"]
+margin_right = 100.0
+margin_bottom = 563.0
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Background" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color( 0.180392, 0.184314, 0.196078, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Margin" type="MarginContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_constants/margin_right = 5
+custom_constants/margin_top = 5
+custom_constants/margin_left = 5
+custom_constants/margin_bottom = 5
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Split" type="VBoxContainer" parent="Margin"]
+margin_left = 5.0
+margin_top = 5.0
+margin_right = 95.0
+margin_bottom = 558.0
+
+[node name="Sepperator" type="VSplitContainer" parent="Margin"]
+margin_left = 5.0
+margin_top = 5.0
+margin_right = 95.0
+margin_bottom = 558.0
+split_offset = 400
+
+[node name="Variables" type="Control" parent="Margin/Sepperator"]
+margin_right = 90.0
+margin_bottom = 400.0
+
+[node name="Background" type="ColorRect" parent="Margin/Sepperator/Variables"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color( 0.14902, 0.14902, 0.164706, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HeaderSplit" type="VBoxContainer" parent="Margin/Sepperator/Variables"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_constants/separation = 0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="Margin/Sepperator/Variables/HeaderSplit"]
+margin_right = 90.0
+margin_bottom = 20.0
+rect_min_size = Vector2( 0, 20 )
+text = "Formulas"
+align = 1
+valign = 1
+
+[node name="Separator" type="HSeparator" parent="Margin/Sepperator/Variables/HeaderSplit"]
+margin_top = 20.0
+margin_right = 90.0
+margin_bottom = 24.0
+
+[node name="Margin" type="MarginContainer" parent="Margin/Sepperator/Variables/HeaderSplit"]
+margin_top = 24.0
+margin_right = 90.0
+margin_bottom = 400.0
+size_flags_vertical = 3
+custom_constants/margin_right = 5
+custom_constants/margin_left = 5
+custom_constants/margin_bottom = 5
+
+[node name="Scroll" type="ScrollContainer" parent="Margin/Sepperator/Variables/HeaderSplit/Margin"]
+margin_left = 5.0
+margin_right = 85.0
+margin_bottom = 371.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Split" type="VBoxContainer" parent="Margin/Sepperator/Variables/HeaderSplit/Margin/Scroll"]
+margin_right = 80.0
+margin_bottom = 32.0
+rect_min_size = Vector2( 0, 32 )
+size_flags_horizontal = 3
+
+[node name="Characters" type="Control" parent="Margin/Sepperator"]
+margin_top = 412.0
+margin_right = 90.0
+margin_bottom = 553.0
+
+[node name="Background" type="ColorRect" parent="Margin/Sepperator/Characters"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color( 0.14902, 0.14902, 0.164706, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HeaderSplit" type="VBoxContainer" parent="Margin/Sepperator/Characters"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_constants/separation = 0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="Margin/Sepperator/Characters/HeaderSplit"]
+margin_right = 90.0
+margin_bottom = 20.0
+rect_min_size = Vector2( 0, 20 )
+text = "Characters"
+align = 1
+valign = 1
+
+[node name="Separator" type="HSeparator" parent="Margin/Sepperator/Characters/HeaderSplit"]
+margin_top = 20.0
+margin_right = 90.0
+margin_bottom = 24.0
+
+[node name="Margin" type="MarginContainer" parent="Margin/Sepperator/Characters/HeaderSplit"]
+margin_top = 24.0
+margin_right = 90.0
+margin_bottom = 141.0
+size_flags_vertical = 3
+custom_constants/margin_right = 5
+custom_constants/margin_left = 5
+custom_constants/margin_bottom = 5
+
+[node name="Scroll" type="ScrollContainer" parent="Margin/Sepperator/Characters/HeaderSplit/Margin"]
+margin_left = 5.0
+margin_right = 85.0
+margin_bottom = 112.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Split" type="Container" parent="Margin/Sepperator/Characters/HeaderSplit/Margin/Scroll"]
+margin_right = 80.0
+size_flags_horizontal = 3
+script = ExtResource( 2 )
+separation = 2

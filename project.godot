@@ -29,6 +29,11 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://Src/Code/Commands.gd"
 }, {
+"base": "Control",
+"class": "Main",
+"language": "GDScript",
+"path": "res://Src/Main/Main.gd"
+}, {
 "base": "Node",
 "class": "UA",
 "language": "GDScript",
@@ -49,6 +54,7 @@ _global_script_class_icons={
 "Code": "",
 "ColoumnFill": "",
 "Command": "",
+"Main": "",
 "UA": "",
 "Unit": "",
 "Value": ""
