@@ -2,6 +2,13 @@ class_name UA
 extends Node
 
 
+static func size(a: String) -> int:
+	var count := 0
+	for unit in Data.derived[a].units:
+		count += abs(Data.derived[a].units[unit])
+	return count
+
+
 static func multiply_u(a: Unit, b: Unit) -> Unit:
 	var res := Unit.new()
 	for part in a.units:
@@ -92,5 +99,6 @@ static func derive(u: Unit) -> Unit:
 			if not unit in res.units:
 				res.units[unit] = 0
 			res.units[unit] += val
+	res._simplify()
 	return res
 

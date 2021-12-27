@@ -25,13 +25,7 @@ func _init():
 
 class DerivedSorter:
 	static func comparator(a: String, b: String) -> bool:
-		var a_count := 0
-		var b_count := 0
-		for unit in Data.derived[a].units:
-			a_count += abs(Data.derived[a].units[unit])
-		for unit in Data.derived[b].units:
-			b_count += abs(Data.derived[b].units[unit])
-		return a_count > b_count
+		return UA.size(a) > UA.size(b)
 
 
 func _get_formulas() -> void:

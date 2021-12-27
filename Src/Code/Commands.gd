@@ -142,17 +142,20 @@ func find(args: Array, code: Code, exporting := false) -> Array:
 		for v in order:
 			if v in calc:
 				used.append(v)
-			calc = calc.replace(" "+v+" ", "("+found[v]+")")
+			calc = calc.replace(" "+v+" ", "("+found[v]+" )")
 		used.invert()
 		for v in used:
 			Data.exported.append("$"+v+"="+Code.equation_to_latex(found[v])+"$")
 			for u in used:
 				if u == v:
 					break
-				found[v] = found[v].replace(" "+u+" ", "("+found[u]+")")
+				found[v] = found[v].replace(" "+u+" ", "("+found[u]+" )")
 			var evaled := code.eval(found[v])
-			Data.exported.append("$"+v+"="+evaled[1][0].to_latex()+"$")
+			if len(evaled) > 1:
+				Data.exported.append("$"+v+"="+evaled[1][0].to_latex()+"$")
 		var evaled := code.eval(calc)
+		if len(evaled) < 1:
+			return ["error", "Can not find " + target]
 		res = target + " has been found to be " + str(evaled[1][0])
 		Data.defaults.clear()
 		return [[evaled[1][0], Code.TYPES.VALUE]]
