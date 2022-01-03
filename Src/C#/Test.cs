@@ -7,6 +7,12 @@ using ParserRes = ParserCombinator.ParserRes;
 public class Test : Control {
 
     public override void _Ready() {
+
+		Unit a = new Unit("");
+		a.AddUnit("a", 2);
+		GD.Print(a.ToString());
+
+
         int Evaluate(GrammarTree tree) {
             int res = 0;
             switch(tree.type) {
