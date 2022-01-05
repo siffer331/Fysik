@@ -232,7 +232,7 @@ public static class ParserCombinator {
 	public static Parser ManySeperated(Parser sepperator, Parser content) {
 		ParserRes Res(String s) {
 			ParserRes res = AnySeperated(sepperator, content)(s);
-			if(res.tree.children.Count == 0) return new ParserRes(false, "ManySeperated: Found no matches");
+			if(res.tree.children.Count == 0) return new ParserRes(false, "ManySeperated: Found no matches in "+s);
 			return res;
 		}
 		return Res;

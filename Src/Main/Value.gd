@@ -30,15 +30,21 @@ func to_latex() -> String:
 	var bottom := []
 	for part in u.units:
 		if u.units[part] < 0:
+			var text: String = "\\text{"+part+"}"
+			if part in Data.characters:
+				text = part
 			if u.units[part] != -1:
-				bottom.append("\\text{"+part+"}^{"+str(-u.units[part])+"}")
+				bottom.append(text+"^{"+str(-u.units[part])+"}")
 			else:
-				bottom.append("\\text{"+part+"}")
+				bottom.append(text)
 		else:
+			var text: String = "\\text{"+part+"}"
+			if part in Data.characters:
+				text = part
 			if u.units[part] != 1:
-				top.append("\\text{"+part+"}^{"+str(u.units[part])+"}")
+				top.append(text+"^{"+str(u.units[part])+"}")
 			else:
-				top.append("\\text{"+part+"}")
+				top.append(text)
 	var unit_string := ""
 	if len(top) == 0:
 		unit_string = "1"

@@ -4,7 +4,7 @@ signal variable_changed
 signal exporting
 
 const characters := ["π", "Ω", "μ", "τ", "ε"]
-const latex_characters := {"π": "\\pi", "Ω": "\\O", "μ": "\\mu", "τ": "\\t", "ε": "\\e"}
+const latex_characters := {"π": "\\pi", "Ω": "\\Omega", "μ": "\\mu", "τ": "\\tau", "ε": "\\epsilon"}
 const prefixes := {
 	'Y': 24,
 	'Z': 21,

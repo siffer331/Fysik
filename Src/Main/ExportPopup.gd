@@ -6,6 +6,7 @@ func _ready() -> void:
 
 
 func _on_Data_exporting() -> void:
+	$Margin/Text.text = ""
 	for line in Data.exported:
 		$Margin/Text.text += line + "\n"
 	popup()

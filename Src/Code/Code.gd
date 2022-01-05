@@ -205,6 +205,8 @@ func eval(line: String, save := false) -> Array:
 		return [parts[0][0] + " has been set to " + str(parts[2][0]), parts[2][0]]
 	if len(parts) == 0:
 		return ["Succesfull", ["", TYPES.EMPTY]]
+	if save and parts[0][1] == TYPES.VALUE:
+		Data.exported.append("$"+parts[0][0].to_latex()+"$")
 	return ["result: " + str(parts[0][0]), parts[0]]
 
 
@@ -360,7 +362,6 @@ func export_md() -> void:
 	for i in range(len(Data.exported)):
 		for replace in Data.latex_characters:
 			Data.exported[i] = Data.exported[i].replace(replace, Data.latex_characters[replace])
-		print(Data.exported[i])
 	Data.emit_signal("exporting")
 
 
