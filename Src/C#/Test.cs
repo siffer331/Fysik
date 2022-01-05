@@ -8,10 +8,10 @@ public class Test : Control {
 
     public override void _Ready() {
 
-		Unit a = new Unit("");
-		a.AddUnit("a", 2);
-		GD.Print(a.ToString());
-
+		Value a = new Value(0,1230.213d);
+		Value b = a*3.2d;
+		a.unit.SetUnit("A", -1);
+		b.unit.SetUnit("m", 3);
 
         int Evaluate(GrammarTree tree) {
             int res = 0;

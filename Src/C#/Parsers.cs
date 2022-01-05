@@ -17,5 +17,9 @@ public static class Parsers {
         Parser divide = PS.Choice(PS.SetType(PS.Sequence(multiply, PS.Str("/"), multiply), "divide"), multiply);
         return PS.SetType(PS.ManySeperated(PS.Choice(PS.Str("+"), PS.Str("-")), divide), "add")(s);
     }
-
+	public static Parser word = PS.Concatenate(PS.Many(PS.Letter), "word");
+	public static Parser unitPart = PS.Choice(PS.SetType(PS.Sequence(word, PS.Str("^"), integer), "unit_exponent"), word);
+	public static Parser unitMultiply = PS.SetType(PS.ManySeperated(word, PS.Str("*")), "unit_multiply");
+	public static Parser unitDivide = PS.SetType(PS.Sequence(unitMultiply, PS.Str("/"), unitMultiply), "unit_divide");
+	public static Parser unit = PS.Choice(unitDivide, unitMultiply);
 }
