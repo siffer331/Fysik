@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "A4TwbxN8SnuOOwn+TOo0pElcd+fa+Je1fVFHnR00JhLK8rZ10NUAy7un0l64UQ71wf7PTv/GkqgdaEofH4FNEw==",
+  "dgSpecHash": "tWoHPwy6EnFYZVfzehGGGNjYEV75SIwzEPH37a+Nc3EaMoMd3YY41dDDmlJ5G01Jb/ebsef+1KmI9s1cZqGQuA==",
   "success": true,
-  "projectFilePath": "/home/siffer/Documents/Projekts/Fysik/Fysik.csproj",
+  "projectFilePath": "/home/siffer/Documents/Projects/Fysik/Fysik.csproj",
   "expectedPackageFiles": [],
   "logs": []
 }

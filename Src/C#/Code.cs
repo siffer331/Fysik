@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using ParserRes = ParserCombinator.ParserRes;
+using GrammarTree = ParserCombinator.GrammarTree;
 
 public class Code : Control {
 
@@ -10,7 +11,14 @@ public class Code : Control {
 	bool undo = false;
 
 	public override void _Ready() {
+		Data.LoadLibraries();
 		code = GetNode(codePath) as TextEdit;
+
+		code.AddColorRegion("///", "", new Color(.6f,.3f,.3f));
+		code.AddColorRegion("//", "", new Color(.4f,.4f,.8f));
+		code.AddColorRegion("#", "", new Color(.4f,.4f,.4f));
+		code.AddColorRegion("%", "", new Color(.4f,.7f,.4f));
+		code.AddColorRegion("[", "]", new Color(.4f,.5f,.8f));
 	}
 
 	public override void _Input(InputEvent inputEvent) {
@@ -48,16 +56,25 @@ public class Code : Control {
 
 	public String EvaluateLine(String line) {
 		if(line != "" && line[0] != '#' && line[0] != '%' && (line.Length < 2 || line.Substring(0,2) != "//")) {
-			ParserRes parsingResult = Parsers.unit(line);
+			ParserRes parsingResult = Parsers.run(line);
 			if(!parsingResult.succes) return "/" + parsingResult.ToString();
 			if(parsingResult.rest != "") return "/missplassed text: " + parsingResult.rest;
 
 			try {
-				Unit result = Evaluators.Unit(parsingResult.tree);
-				return result.ToString();
+				switch(parsingResult.tree.type) {
+					case "add":
+						Value result = Evaluators.Calculation(parsingResult.tree);
+						return result.ToString();
+					case "set_variable":
+						String variableName = parsingResult.tree.children.First.Value.data;
+						Value value = Evaluators.Calculation(parsingResult.tree.children.First.Next.Next.Value);
+						Data.variables[variableName] = value;
+						return variableName + " has been set to " + value.ToString();
+				}
+				return "/Did not recognise tree type " + parsingResult.tree.type;
 			}
 			catch(Exception e) {
-				return "/" + e.ToString();
+				return "/" + e.Message;
 			}
 		}
 		return "";

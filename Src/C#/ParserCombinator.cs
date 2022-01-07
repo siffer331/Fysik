@@ -133,26 +133,57 @@ public static class ParserCombinator {
 		}
 		return Res;
 	}
+
+	public static Parser CompressLayer(Parser f) {
+		ParserRes Res(String s) {
+			ParserRes res = f(s);
+			LinkedList<GrammarTree> list = new LinkedList<GrammarTree>();
+			foreach(GrammarTree child in res.tree.children) {
+				foreach(GrammarTree node in child.children) list.AddLast(node);
+			}
+			res.tree.children = list;
+			return res;
+		}
+		return Res;
+	}
+
+	public static Parser GetChild(Parser f, int child) {
+		ParserRes Res(String s) {
+			ParserRes res = f(s);
+			if(child >= res.tree.children.Count) {
+				res.tree.children = new LinkedList<GrammarTree>();
+				return res;
+			}
+
+			LinkedListNode<GrammarTree> tree = res.tree.children.First;
+			for(int i = 0; i < child; i++) tree = tree.Next;
+			res.tree = tree.Value;
+			return res;
+		}
+		return Res;
+	}
 	
-	public static Parser Any(Parser f) {
+	public static Parser Any(Parser f, Parser eat = null) {
 		ParserRes Res(String s) {
 			ParserRes res = new ParserRes(true);
 			res.tree.type = "sequence";
 			while(true) {
+				if(eat != null) s = eat(s).rest;
 				ParserRes test = f(s);
 				if(!test.succes) break;
 				res.tree.children.AddLast(test.tree);
 				s = test.rest;
 			}
+			if(eat != null) s = eat(s).rest;
 			res.rest = s;
 			return res;
 		}
 		return Res;
 	}
 
-	public static Parser Many(Parser f) {
+	public static Parser Many(Parser f, Parser eat = null) {
 		ParserRes Res(String s) {
-			ParserRes res = Any(f)(s);
+			ParserRes res = Any(f, eat)(s);
 			if(res.tree.children.Count == 0) return new ParserRes(false, "Many: Found no matches");
 			return res;
 		}
@@ -173,48 +204,58 @@ public static class ParserCombinator {
 	}
 
 	public static Parser Sequence(params Parser[] parsers) {
+		return SequenceEat(null, parsers);
+	}
+
+	public static Parser SequenceEat(Parser eat, params Parser[] parsers) {
 		ParserRes Res(String s) {
 			ParserRes res = new ParserRes(true);
 			res.tree.type = "sequence";
 			foreach(Parser parser in parsers) {
+				if(eat != null) s = eat(s).rest;
 				ParserRes test = parser(s);
 				if(!test.succes) return new ParserRes(false, test.error);
 				res.tree.children.AddLast(test.tree);
 				s = test.rest;
 			}
+			if(eat != null) s = eat(s).rest;
 			res.rest = s;
 			return res;
 		}
 		return Res;
 	}
 
-	public static Func<Parser, Parser> Between(Parser start, Parser end) {
+	public static Func<Parser, Parser> Between(Parser start, Parser end, Parser eat = null) {
 		Parser Res(Parser parser) {
-			return Sequence(start, parser, end);
+			return Sequence(start, parser, end, eat);
 		}
 		return Res;
 	}
 
-	public static Func<Parser, Parser> BetweenStr(String start, String end) {
-		return Between(Str(start), Str(end));
+	public static Func<Parser, Parser> BetweenStr(String start, String end, Parser eat = null) {
+		return Between(Str(start), Str(end), eat);
 	}
 
-	public static Parser AnySeperated(Parser sepperator, Parser content) {
+	public static Parser AnySeperated(Parser sepperator, Parser content, Parser eat = null) {
 		ParserRes Res(String s) {
 			ParserRes res = new ParserRes(true);
 			res.tree.type = "sequence";
+			if(eat != null) s = eat(s).rest;
 			ParserRes test = content(s);
 			if(!test.succes) return res;
 			s = test.rest;
 			res.tree.children.AddLast(test.tree);
 			if(test.succes) {
 				while(true) {
+					if(eat != null) s = eat(s).rest;
 					test = sepperator(s);
 					if(!test.succes) {
 						break;
 					}
 					GrammarTree tree = test.tree;
-					test = content(test.rest);
+					String rest = test.rest;
+					if(eat != null) rest = eat(rest).rest;
+					test = content(rest);
 					if(!test.succes) {
 						break;
 					}
@@ -223,15 +264,16 @@ public static class ParserCombinator {
 					s = test.rest;
 				}
 			}
+			if(eat != null) s = eat(s).rest;
 			res.rest = s;
 			return res;
 		}
 		return Res;
 	}
 
-	public static Parser ManySeperated(Parser sepperator, Parser content) {
+	public static Parser ManySeperated(Parser sepperator, Parser content, Parser eat = null) {
 		ParserRes Res(String s) {
-			ParserRes res = AnySeperated(sepperator, content)(s);
+			ParserRes res = AnySeperated(sepperator, content, eat)(s);
 			if(res.tree.children.Count == 0) return new ParserRes(false, "ManySeperated: Found no matches in "+s);
 			return res;
 		}

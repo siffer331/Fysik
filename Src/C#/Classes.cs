@@ -10,6 +10,7 @@ public struct Unit {
 	public Unit(String k = "") {
 		units = new String[0];
 		powers = new int[0];
+		if(k != "") SetUnit(k,1);
 	}
 
 	public Unit(Dictionary<String, int> parts) {
@@ -108,7 +109,7 @@ public struct Unit {
 		String[] newUnits = new String[l];
 		int[] newPowers = new int[l];
 		int index = 0;
-		for(int i = 0; i < l; i++) {
+		for(int i = 0; i < units.Length; i++) {
 			if(powers[i] != 0) {
 				newUnits[index] = units[i];
 				newPowers[index] = powers[i];
@@ -117,6 +118,38 @@ public struct Unit {
 		}
 		units = newUnits;
 		powers = newPowers;
+	}
+
+	public Tuple<double, int> ConvertToSI() {
+		int resPower = 0;
+		double resFactor = 1;
+		Unit unit = new Unit();
+		for(int i = 0; i < units.Length; i++) {
+			String label = units[i];
+			int power = powers[0];
+			if(label.Length > 1 && Data.prefixes.ContainsKey(label[0])) {
+				resPower += Data.prefixes[label[0]]*power;
+				label = label.Substring(1);
+				if(!Data.conversions.ContainsKey(label)) unit.ChangeUnit(label, power);
+				powers[i] = 0;
+			}
+			if(Data.conversions.ContainsKey(label)) {
+				Tuple<double, Unit> conversion = Data.conversions[label];
+				unit += conversion.Item2;
+				resFactor *= conversion.Item1;
+				powers[i] = 0;
+			}
+
+		}
+		this += unit;
+		Simplify();
+		return Tuple<double, int>(resPower, resFactor);
+	}
+
+	public void Debug() {
+		GD.Print("Debug begin");
+		for(int i = 0; i < units.Length; i++) GD.Print("  ", units[i], " ", powers[i]);
+		GD.Print("Debug end");
 	}
 
 	public bool IsOne() {
@@ -130,18 +163,8 @@ public struct Unit {
 			if(!parts.ContainsKey(b.units[i])) parts[b.units[i]] = 0;
 			parts[b.units[i]] += b.powers[i];
 		}
-		//foreach(String key in parts.Keys) GD.Print(key," ",parts[key]);
-		//GD.Print("fse ", parts.Count);
 		Unit res = new Unit(parts);
-		//for(int i = 0; i < res.units.Length; i++) GD.Print(res.powers[i]);
-		//GD.Print("A");
-		//for(int i = 0; i < a.units.Length; i++) GD.Print(a.powers[i]);
-		//GD.Print("B");
-		//for(int i = 0; i < b.units.Length; i++) GD.Print(b.powers[i]);
-		//GD.Print("k");
 		res.Simplify();
-		//GD.Print(res.units.Length);
-		//GD.Print("k");
 		return res;
 	}
 
@@ -223,6 +246,13 @@ public struct Value {
 		this.power = power;
 		this.value = value;
 		this.unit = unit;
+		ConvertToSI();
+	}
+
+	public void ConvertToSI() {
+		Tuple<double, int> factor = unit.ConvertToSI();
+		value *= factor.Item1;
+		power += factor.Item2;
 		Simplify();
 	}
 
@@ -285,6 +315,10 @@ public struct Value {
 
 	public static Value operator -(Value a) {
 		return (-1d)*a;
+	}
+
+	public static Value operator -(Value a, Value b) {
+		return a +(-b);
 	}
 
 	public static Value operator *(Value a, Value b) {

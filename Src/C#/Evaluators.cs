@@ -19,42 +19,50 @@ public class Evaluators {
 				return Unit(tree.children.First.Value) *
 				int.Parse(tree.children.First.Next.Next.Value.data);
 			case "word":
-				res.SetUnit(tree.data, 1);
-				return res;
+				return new Unit(tree.data);
 		}
 		throw new Exception("Could not evaluate type " + tree.type);
 	}
 
-	public static int Calculation(GrammarTree tree) {
-		int res = 0;
+	public static Value Calculation(GrammarTree tree) {
+		Value res = new Value(0,1);
 		switch(tree.type) {
 			case "number":
-				return int.Parse(tree.data);
-			case "calculation":
-				return Calculation(tree.children.First.Next.Value);
+				return new Value(0, int.Parse(tree.data));
+			case "value_unit":
+				res = Calculation(tree.children.First.Value);
+				res.unit = Unit(tree.children.First.Next.Value);
+				return res;
 			case "add":
-				res = 0;
 				bool add = true;
+				bool first = true;
 				foreach(GrammarTree child in tree.children) {
-				if(child.data == "+") add = true;
-				else if(child.data == "-") add = false;
-				else if(add) res += Calculation(child);
-				else res -= Calculation(child);
+					if(first) {
+						res = Calculation(child);
+						first = false;
+					}
+					else if(child.data == "+") add = true;
+					else if(child.data == "-") add = false;
+					else if(add) res += Calculation(child);
+					else res -= Calculation(child);
 				}
 				return res;
 			case "multiply":
-				res = 1;
+				res.value = 1;
 				foreach(GrammarTree child in tree.children) {
-				if(child.data != "*") res *= Calculation(child);
+					if(child.data != "*") res *= Calculation(child);
 				}
 				return res;
 			case "divide":
 				res = Calculation(tree.children.First.Value);
-				int divide = Calculation(tree.children.First.Next.Next.Value);
-				if(divide == 0) return 0;
+				Value divide = Calculation(tree.children.First.Next.Next.Value);
 				return res/divide;
 			case "negate":
 				return -Calculation(tree.children.First.Next.Value);
+			case "word":
+				if(Data.variables.ContainsKey(tree.data)) return Data.variables[tree.data];
+				if(Data.factors.ContainsKey(tree.data)) return new Value(0, Data.factors[tree.data]);
+				throw new Exception("Could not find variable " + tree.data);
 		}
 		throw new Exception("Could not evaluate type " + tree.type);
 	}
