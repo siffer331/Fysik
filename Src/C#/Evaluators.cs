@@ -25,13 +25,13 @@ public class Evaluators {
 	}
 
 	public static Value Calculation(GrammarTree tree) {
-		Value res = new Value(0,1);
+		Value res = new Value(1);
 		switch(tree.type) {
 			case "number":
-				return new Value(0, int.Parse(tree.data));
+				return new Value( double.Parse(tree.data));
 			case "value_unit":
 				res = Calculation(tree.children.First.Value);
-				res.unit = Unit(tree.children.First.Next.Value);
+				res.SetUnit(Unit(tree.children.First.Next.Value));
 				return res;
 			case "add":
 				bool add = true;
@@ -61,8 +61,15 @@ public class Evaluators {
 				return -Calculation(tree.children.First.Next.Value);
 			case "word":
 				if(Data.variables.ContainsKey(tree.data)) return Data.variables[tree.data];
-				if(Data.factors.ContainsKey(tree.data)) return new Value(0, Data.factors[tree.data]);
+				if(Data.factors.ContainsKey(tree.data)) return new Value(Data.factors[tree.data]);
+				if(Data.constants.ContainsKey(tree.data)) return Data.constants[tree.data];
 				throw new Exception("Could not find variable " + tree.data);
+			case "sin":
+				return Commands.Sin(Calculation(tree.children.First.Next.Value));
+			case "cos":
+				return Commands.Cos(Calculation(tree.children.First.Next.Value));
+			case "tan":
+				return Commands.Tan(Calculation(tree.children.First.Next.Value));
 		}
 		throw new Exception("Could not evaluate type " + tree.type);
 	}

@@ -3,45 +3,44 @@ using System;
 using System.Collections.Generic;
 
 
-public struct Unit {
-	String[] units;
-	int[] powers;
+public class Unit {
+	Dictionary<String, int> parts = new Dictionary<string, int>();
 
-	public Unit(String k = "") {
-		units = new String[0];
-		powers = new int[0];
-		if(k != "") SetUnit(k,1);
+	public Unit(String k = "", int p = 1) {
+		if(k != "" && k != "1")  parts[k] = p;
 	}
 
 	public Unit(Dictionary<String, int> parts) {
-		int l = parts.Count;
-		units = new String[l];
-		powers = new int[l];
-		int index = 0;
-		foreach(String key in parts.Keys) {
-			units[index] = key;
-			powers[index] = parts[key];
-			index++;
-		}
+		foreach(String key in parts.Keys) this.parts[key] = parts[key];
 	}
 
-	public Dictionary<String, int> GetParts() {
-		Dictionary<String, int> parts = new Dictionary<string, int>();
-		for(int i = 0; i < units.Length; i++) parts[units[i]] = powers[i];
-		return parts;
+	public Unit Clone() {
+		return new Unit(parts);
+	}
+
+	public int Count() {
+		int res = 0;
+		foreach(int power in parts.Values) res += Math.Abs(power);
+		return res;
+	}
+
+	public List<String> GetKeys() {
+		List<String> res = new List<string>();
+		foreach(String key in parts.Keys) res.Add(key);
+		return res;
 	}
 
 	public String ToString() {
 		String top = "";
 		String bottom = "";
-		for(int i = 0; i < units.Length; i++) {
-			if(powers[i] > 0) {
-				top += "*" + units[i];
-				if(powers[i] > 1) top += "^" + powers[i].ToString();
+		foreach(String key in parts.Keys) {
+			if(parts[key] > 0) {
+				top += "*" + key;
+				if(parts[key] > 1) top += "^" + parts[key].ToString();
 			}
 			else {
-				bottom += "*" + units[i];
-				if(powers[i] < -1) bottom += "^" + (-powers[i]).ToString();
+				bottom += "*" + key;
+				if(parts[key] < -1) bottom += "^" + (-parts[key]).ToString();
 			}
 		}
 		if(top != "") top = top.Substring(1);
@@ -51,119 +50,87 @@ public struct Unit {
 		return top + "/" + bottom;
 	}
 
-	public void SetUnit(string unit, int power) {
-		int l = units.Length;
-		String[] newUnits = new String[l+1];
-		int[] newPowers = new int[l+1];
-		for(int i = 0; i < l; i++) {
-			newUnits[i] = units[i];
-			newPowers[i] = powers[i];
+	public String GetReadeable() {
+		Unit res = Clone();
+		foreach(String alias in Data.aliases) {
+			while(res >= Data.conversions[alias].Item2) {
+				res -= Data.conversions[alias].Item2;
+				res.ChangeUnit(alias, 1);
+			}
+			while(res >= -Data.conversions[alias].Item2) {
+				res += Data.conversions[alias].Item2;
+				res.ChangeUnit(alias, -1);
+			}
 		}
-		newUnits[l] = unit;
-		newPowers[l] = power;
-		units = newUnits;
-		powers = newPowers;
+		return res.ToString();
+	}
+
+	public void SetUnit(string unit, int power) {
+		parts[unit] = power;
 	}
 
 	public int GetUnit(String unit) {
-		int index = Find(unit);
-		if(index == -1) return 0;
-		return powers[index];
+		if(!parts.ContainsKey(unit)) return 0;
+		return parts[unit];
 	}
 
 	public void ChangeUnit(String unit, int power) {
-		SetUnit(unit, power + GetUnit(unit));
+		parts[unit] = power + GetUnit(unit);
 	}
 
 	public void RemoveUnit(string unit) {
-		int index = Find(unit);
-		if(index == -1) return;
-		int l = units.Length;
-		String[] newUnits = new String[l-1];
-		int[] newPowers = new int[l-1];
-		for(int i = 0; i < l; i++) {
-			if(i < index) {
-				newUnits[i] = units[i];
-				newPowers[i] = powers[i];
-			}
-			else {
-				newUnits[i] = units[i+1];
-				newPowers[i] = powers[i+1];
-			}
-		}
-		units = newUnits;
-		powers = newPowers;
+		if(!parts.ContainsKey(unit)) return;
+		parts.Remove(unit);
 	}
 		
-
-	public int Find(string unit) {
-		for(int i = 0; i < units.Length; i++) {
-			if(units[i] == unit) return i;
-		}
-		return -1;
-	}
-
 	public void Simplify() {
-		int l = 0;
-		for(int i = 0; i < powers.Length; i++) if(powers[i] != 0) l++;
-		String[] newUnits = new String[l];
-		int[] newPowers = new int[l];
-		int index = 0;
-		for(int i = 0; i < units.Length; i++) {
-			if(powers[i] != 0) {
-				newUnits[index] = units[i];
-				newPowers[index] = powers[i];
-				index++;
-			}
+		List<String> remove = new List<string>();
+		foreach(String key in parts.Keys) {
+			if(parts[key] == 0) remove.Add(key);
 		}
-		units = newUnits;
-		powers = newPowers;
+		foreach(String key in remove) parts.Remove(key);
 	}
 
-	public Tuple<double, int> ConvertToSI() {
-		int resPower = 0;
+	public double ConvertToSI() {
 		double resFactor = 1;
 		Unit unit = new Unit();
-		for(int i = 0; i < units.Length; i++) {
-			String label = units[i];
-			int power = powers[0];
-			if(label.Length > 1 && Data.prefixes.ContainsKey(label[0])) {
-				resPower += Data.prefixes[label[0]]*power;
+		foreach(String key in GetKeys()) {
+			String label = key;
+			int power = parts[key];
+			if(!Data.conversions.ContainsKey(label) && label.Length > 1 && Data.prefixes.ContainsKey(label[0])) {
+				resFactor *= Math.Pow(10, Data.prefixes[label[0]]*power);
 				label = label.Substring(1);
 				if(!Data.conversions.ContainsKey(label)) unit.ChangeUnit(label, power);
-				powers[i] = 0;
+				parts[key] = 0;
 			}
 			if(Data.conversions.ContainsKey(label)) {
 				Tuple<double, Unit> conversion = Data.conversions[label];
-				unit += conversion.Item2;
+				//GD.Print(label, " ", unit.ToString(), " ", power, " ", conversion.Item3.ToString());
+				//GD.Print((conversion.Item3*power).ToString(), " ", (unit + conversion.Item3*power).ToString());
+				unit += conversion.Item2*power;
 				resFactor *= conversion.Item1;
-				powers[i] = 0;
+				parts[key] = 0;
 			}
 
 		}
-		this += unit;
+		parts = (this+unit).parts;
 		Simplify();
-		return Tuple<double, int>(resPower, resFactor);
+		return resFactor;
 	}
 
 	public void Debug() {
 		GD.Print("Debug begin");
-		for(int i = 0; i < units.Length; i++) GD.Print("  ", units[i], " ", powers[i]);
+		foreach(String key in parts.Keys) GD.Print("   ", key, " ", parts[key]);
 		GD.Print("Debug end");
 	}
 
 	public bool IsOne() {
-		return units.Length == 0;
+		return parts.Count == 0;
 	}
 
 	public static Unit operator +(Unit a, Unit b) {
-		Dictionary<String, int> parts = new Dictionary<string, int>();
-		for(int i = 0; i < a.units.Length; i++) parts[a.units[i]] = a.powers[i];
-		for(int i = 0; i < b.units.Length; i++) {
-			if(!parts.ContainsKey(b.units[i])) parts[b.units[i]] = 0;
-			parts[b.units[i]] += b.powers[i];
-		}
-		Unit res = new Unit(parts);
+		Unit res = a.Clone();
+		foreach(String key in b.parts.Keys) res.ChangeUnit(key, b.parts[key]);
 		res.Simplify();
 		return res;
 	}
@@ -177,9 +144,9 @@ public struct Unit {
 	}
 
 	public static Unit operator *(Unit a, int b) {
-		if(b == 0) return new Unit();
-		for(int i = 0; i < a.units.Length; i++) a.powers[i] *= b;
-		return a;
+		Unit res = a.Clone();
+		foreach(String key in res.GetKeys()) res.parts[key] *= b;
+		return res;
 	}
 
 	public static Unit operator *(int a, Unit b) {
@@ -187,18 +154,17 @@ public struct Unit {
 	}
 
 	public static Unit operator /(Unit a, int b) {
-		if(b == 0) throw new DivideByZeroException();
-		for(int i = 0; i < a.units.Length; i++) a.powers[i] /= b;
-		a.Simplify();
-		return a;
+		Unit res = a.Clone();
+		foreach(String key in res.GetKeys()) res.parts[key] /= b;
+		return res;
 	}
 
 	public static bool operator ==(Unit a, Unit b) {
-		Dictionary<String, int> aParts = a.GetParts();
-		Dictionary<String, int> bParts = b.GetParts();
-		if(aParts.Count != bParts.Count) return false;
-		foreach(String key in aParts.Keys) {
-			if(!bParts.ContainsKey(key) || bParts[key] != aParts[key]) return false;
+		foreach(String key in a.parts.Keys) {
+			if(a.GetUnit(key) != b.GetUnit(key)) return false;
+		}
+		foreach(String key in b.parts.Keys) {
+			if(a.GetUnit(key) != b.GetUnit(key)) return false;
 		}
 		return true;
 	}
@@ -208,10 +174,8 @@ public struct Unit {
 	}
 
 	public static bool operator <(Unit a, Unit b) {
-		foreach(String key in a.units) if(b.GetUnit(key) != 0) return false;
-		foreach(String key in b.units) {
-			int aPower = a.GetUnit(key);
-			int bPower = b.GetUnit(key);
+		foreach(String key in a.parts.Keys) {
+			int aPower = a.GetUnit(key); int bPower = b.GetUnit(key);
 			if(Math.Sign(aPower) != Math.Sign(bPower) || Math.Abs(aPower) >= Math.Abs(bPower)) return false;
 		}
 		return true;
@@ -222,10 +186,8 @@ public struct Unit {
 	}
 
 	public static bool operator <=(Unit a, Unit b) {
-		foreach(String key in a.units) if(b.GetUnit(key) != 0) return false;
-		foreach(String key in b.units) {
-			int aPower = a.GetUnit(key);
-			int bPower = b.GetUnit(key);
+		foreach(String key in a.parts.Keys) {
+			int aPower = a.GetUnit(key); int bPower = b.GetUnit(key);
 			if(Math.Sign(aPower) != Math.Sign(bPower) || Math.Abs(aPower) > Math.Abs(bPower)) return false;
 		}
 		return true;
@@ -238,74 +200,56 @@ public struct Unit {
 
 public struct Value {
 
-	public int power;
 	public double value;
 	public Unit unit;
 
-	public Value(int power, double value, Unit unit) {
-		this.power = power;
+	public Value( double value, Unit unit) {
 		this.value = value;
-		this.unit = unit;
+		this.unit = unit.Clone();
 		ConvertToSI();
 	}
 
 	public void ConvertToSI() {
-		Tuple<double, int> factor = unit.ConvertToSI();
-		value *= factor.Item1;
-		power += factor.Item2;
-		Simplify();
+		value *= unit.ConvertToSI();
 	}
 
-	public Value(int power, double value) {
-		this.power = power;
+	public Value(double value) {
 		this.value = value;
-		this.unit = new Unit("");
-		Simplify();
+		this.unit = new Unit();
 	}
 
-	public void Simplify() {
-		int change = power%3;
-		power -= change;
-		value *= Math.Pow(10d, change);
-
-		while(Math.Abs(value) >= 1000d) {
-			value /= 1000d;
-			power += 3;
-		}
-		while(Math.Abs(value) < 1d && Math.Abs(value) > 0d) {
-			value *= 1000;
-			power -= 3;
-		}
-	}
-
-	public double GetValue() {
-		return value*Math.Pow(10d, power);
+	public void SetUnit(Unit value) {
+		unit = value.Clone();
+		ConvertToSI();
 	}
 
 	public String ToString() {
-		String unitString = " " + unit.ToString();
+		String unitString = " " + unit.GetReadeable();
+		int power = (int)Math.Floor(Math.Log10(value));
+		if(value == 0) power = 0;
+		power -= power%3;
 		String powerString = "*10^" + power.ToString();
-		double factor = 1d;
+		double factor = value/Math.Pow(10, power);
 		if(power == 0) powerString = "";
 		if(power == -3) {
-			factor = 0.001d;
+			factor *= 0.001d;
+			powerString = "";
+		}
+		if(power == 3) {
+			factor *= 1000d;
 			powerString = "";
 		}
 		if(unit.IsOne()) unitString = "";
-		return (value*factor).ToString() + powerString + unitString;
+		return (factor).ToString() + powerString + unitString;
 	}
 
 	public static Value operator +(Value a, Value b) {
 		if(a.unit != b.unit) throw new Exception("Units do not match");
-		double value = 0;
-		if(a.power > b.power) value = a.value + b.value*Math.Pow(10d,b.power-a.power);
-		else value = b.value + a.value*Math.Pow(10d,a.power-b.power);
-		return new Value(Math.Max(a.power, b.power), value, a.unit);
+		return new Value(a.value+b.value, a.unit);
 	}
 
 	public static Value operator *(Value a, double b) {
 		a.value *= b;
-		a.Simplify();
 		return a;
 	}
 
@@ -323,29 +267,22 @@ public struct Value {
 
 	public static Value operator *(Value a, Value b) {
 		a.unit += b.unit;
-		a.power += b.power;
 		a.value *= b.value;
-		a.Simplify();
 		return a;
 	}
 
 	public static Value operator /(Value a, Value b) {
-		if(b.value == 0) throw new DivideByZeroException();
 		a.unit -= b.unit;
-		a.power -= b.power;
 		a.value /= b.value;
-		a.Simplify();
 		return a;
 	}
 
 	public static Value operator ^(Value a, Value b) {
-		double value = b.GetValue();
 		if(!b.unit.IsOne()) throw new Exception("Cant exponentiate with non one unit");
-		if(a.unit.IsOne() && (b.value < 0d || (value - Math.Floor(value) > 0.0001) || b.power < 0))
-			throw new Exception("Cant exponentiate non one unit in non positive integers");
-		a.value = Math.Pow(a.value, Math.Floor(value));
-		a.power *= (int)value;
-		a.unit *= (int)value;
+		if(a.unit.IsOne() && Math.Abs(b.value - Math.Floor(b.value)) > 1e-200)
+			throw new Exception("Cant exponentiate non one unit in non integers");
+		a.value = Math.Pow(a.value, Math.Floor(b.value));
+		a.unit *= (int)b.value;
 		return a;
 	}
 

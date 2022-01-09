@@ -21,7 +21,7 @@ func _init():
 	#print("Formulas")
 	#print(Data.formulas)
 	#print("Order")
-	#print(Data.derived_order)
+	print(Data.derived_order)
 
 class DerivedSorter:
 	static func comparator(a: String, b: String) -> bool:

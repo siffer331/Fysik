@@ -1,11 +1,13 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=3 format=2]
 
 [ext_resource path="res://Src/C#/Code.cs" type="Script" id=1]
+[ext_resource path="res://Main.tres" type="Theme" id=2]
 
 [node name="Code" type="Control"]
 margin_right = 680.0
 margin_bottom = 570.0
 size_flags_horizontal = 3
+theme = ExtResource( 2 )
 script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -42,4 +44,5 @@ syntax_highlighting = true
 show_line_numbers = true
 fold_gutter = true
 highlight_all_occurrences = true
+
 [connection signal="text_changed" from="Margin/TextEdit" to="." method="OnTextEditTextChanged"]

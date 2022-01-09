@@ -11,10 +11,20 @@ public static class Data {
 		{'Y', 24}, {'Z', 21}, {'E', 18}, {'P', 15}, {'T', 12}, {'G',  9}, {'M',  6}, {'k',  3}, {'h',  2}, {'D',  1},
 		{'d', -1}, {'c', -2}, {'m', -3}, {'μ', -6}, {'n', -9}, {'p',-12}, {'f',-15}, {'a',-18}, {'z',-21}, {'y',-24}
 	};
+	public static List<String> aliases = new List<string>();
+	public static Dictionary<String, Value> constants = new Dictionary<string, Value>();
 
 	public static void LoadLibraries() {
 		LoadFactors();
 		LoadUnits();
+		LoadConstants();
+		//foreach(String key in conversions.Keys) GD.Print(key, " ", conversions[key].Item1, " ", conversions[key].Item2, " ", conversions[key].Item3.ToString());
+		SortAliases();
+		//foreach(String a in aliases) GD.Print(a);
+	}
+
+	public static void SortAliases() {
+		aliases.Sort((x, y) => conversions[y].Item2.Count() - conversions[x].Item2.Count());
 	}
 
 	private static void LoadFactors() {
@@ -28,6 +38,7 @@ public static class Data {
 			file.Open(dir+fileName, File.ModeFlags.Read);
 			String[] lines = file.GetAsText().Split("\n");
 			foreach(String line in lines) {
+				if(line == "") continue;
 				String[] parts = line.Split(" ");
 				factors[parts[0]] = double.Parse(parts[2]);
 			}
@@ -46,27 +57,58 @@ public static class Data {
 			File file = new File();
 			file.Open(dir+fileName, File.ModeFlags.Read);
 			String[] lines = file.GetAsText().Split("\n");
-			int num = 0;
 			foreach(String line in lines) {
-				if(line == "") return;
-				if(line[0] == '[' ) num = 0;
-				else if(num == 1) {
-					if(line.Contains(" ")) {
-						String[] parts = line.Split(" ");
-						conversions[parts[0]] = new Tuple<double, Unit>(Math.Pow(10, (double)prefixes[parts[1][0]]), new Unit(parts[1]+parts[0]));
+				if(line == "") continue;
+				String[] parts = line.Split(" ");
+				String[] components = new String[] {"1", "", "1", ""};
+				if(parts.Length == 3) {
+					components[1] = parts[0]; components[3] = parts[2];
+				} else if(parts.Length == 4) {
+					if(parts[0] == "SI") {
+						components[1] = parts[1]; components[3] = parts[3];
+						aliases.Add(parts[1]);
 					}
-				}
-				else {
-					String[] parts = line.Split(" ");
-					double factor = GetFactor(parts[3])/GetFactor(parts[0]);
-					Unit unit = new Unit(parts[4]);
-					if(conversions.ContainsKey(parts[4])) {
-						factor *= conversions[parts[4]].Item1;
-						unit = conversions[parts[4]].Item2;
+					else if(parts[0] == "pure") {
+						double fac = GetFactor(parts[3]);
+						conversions[parts[1]] = new Tuple<double, Unit>(fac, new Unit(parts[4]));
+						continue;
 					}
-					conversions[parts[1]] = new Tuple<double, Unit>(factor, unit);
+					else {components[1] = parts[0]; components[2] = parts[2]; components[3] = parts[3];}
+				} else if(parts.Length == 5) {
+					components[0] = parts[0]; components[1] = parts[1]; components[2] = parts[3]; components[3] = parts[4];
+				} else if(parts.Length == 6) {
+					double fac = GetFactor(parts[4])/GetFactor(parts[1]);
+					conversions[parts[2]] = new Tuple<double, Unit>(fac, new Unit(parts[5]));
+					continue;
 				}
-				num++;
+
+				//GD.Print(components[0], " ", components[1], " ", components[2], " ", components[3]);
+				ParserCombinator.ParserRes res = Parsers.unit(components[3]);
+				Unit unit = Evaluators.Unit(res.tree);
+				double conversion = unit.ConvertToSI();
+				double factor = GetFactor(components[2])*conversion/GetFactor(components[0]);
+				//GD.Print(conversion.ToString(), " ", factor.ToString());
+				conversions[components[1]] = new Tuple<double, Unit>(factor, unit);
+			}
+			fileName = directory.GetNext();
+		}
+		directory.ListDirEnd();
+	}
+
+	private static void LoadConstants() {
+		Directory directory = new Directory();
+		String dir = "res://Data/Constants/";
+		directory.Open(dir);
+		directory.ListDirBegin(true, true);
+		String fileName = directory.GetNext();
+		while(fileName != "") {
+			File file = new File();
+			file.Open(dir+fileName, File.ModeFlags.Read);
+			String[] lines = file.GetAsText().Split("\n");
+			foreach(String line in lines) {
+				if(line == "") continue;
+				String[] parts = line.Split(" ");
+				constants[parts[0]] = new Value(double.Parse(parts[2]), Evaluators.Unit(Parsers.unit(parts[3]).tree));
 			}
 			fileName = directory.GetNext();
 		}

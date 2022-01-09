@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 using ParserRes = ParserCombinator.ParserRes;
 using GrammarTree = ParserCombinator.GrammarTree;
 
@@ -9,6 +10,7 @@ public class Code : Control {
 	NodePath codePath;
 	TextEdit code;
 	bool undo = false;
+
 
 	public override void _Ready() {
 		Data.LoadLibraries();
@@ -70,10 +72,20 @@ public class Code : Control {
 						Value value = Evaluators.Calculation(parsingResult.tree.children.First.Next.Next.Value);
 						Data.variables[variableName] = value;
 						return variableName + " has been set to " + value.ToString();
+					case "dealloc":
+						variableName = parsingResult.tree.children.First.Next.Value.data;
+						return Commands.Dealloc(variableName);
+					case "reset":
+						return Commands.Reset();
+					case "to":
+						value = Evaluators.Calculation(parsingResult.tree.children.First.Next.Value.children.First.Value);
+						Unit unit = Evaluators.Unit(parsingResult.tree.children.First.Next.Value.children.First.Next.Next.Value);
+						return Commands.To(value, unit);
 				}
 				return "/Did not recognise tree type " + parsingResult.tree.type;
 			}
 			catch(Exception e) {
+				//GD.Print(e.ToString());
 				return "/" + e.Message;
 			}
 		}
