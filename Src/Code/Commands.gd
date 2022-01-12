@@ -105,8 +105,6 @@ func ln(args: Array, code: Code, exporting := false) -> Array:
 	value.value = log(value.value) + log(10)*value.p
 	value.p = 0
 	value.simplify()
-	for unit in value.unit.units:
-		value.unit.units[unit] *= 2
 	return [[value, Code.TYPES.VALUE]]
 
 

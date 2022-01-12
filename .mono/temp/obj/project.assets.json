@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/siffer/Documents/Projekts/Fysik/Fysik.csproj",
+      "projectUniqueName": "/home/siffer/Documents/Projects/Fysik/Fysik.csproj",
       "projectName": "Fysik",
-      "projectPath": "/home/siffer/Documents/Projekts/Fysik/Fysik.csproj",
+      "projectPath": "/home/siffer/Documents/Projects/Fysik/Fysik.csproj",
       "packagesPath": "/home/siffer/.nuget/packages/",
-      "outputPath": "/home/siffer/Documents/Projekts/Fysik/.mono/temp/obj/",
+      "outputPath": "/home/siffer/Documents/Projects/Fysik/.mono/temp/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/home/siffer/.config/NuGet/NuGet.Config"

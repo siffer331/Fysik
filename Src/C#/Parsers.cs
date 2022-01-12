@@ -31,9 +31,13 @@ public static class Parsers {
 		Parser sin = function(calculation, "sin");
 		Parser cos = function(calculation, "cos");
 		Parser tan = function(calculation, "tan");
-        Parser basicElement = PS.Choice(sin, cos, tan, value, rationalComplete, name, PS.GetChild(parenthesis(calculation), 1));
+		Parser sqrt = function(calculation, "sqrt");
+		Parser log = function(calculation, "log");
+		Parser find = function(name, "find");
+        Parser basicElement = PS.Choice(find, log, sqrt, sin, cos, tan, value, rationalComplete, name, PS.GetChild(parenthesis(calculation), 1));
         Parser element = PS.Choice(basicElement, PS.SetType(PS.SequenceEat(whitespace, PS.Str("-"), basicElement), "negate"));
-        Parser multiply = PS.SetType(PS.ManySeperated(PS.Str("*"), element, whitespace), "multiply");
+		Parser exponent = PS.Choice(PS.SetType(PS.SequenceEat(whitespace, element, PS.Str("^"), element), "exponent"), element);
+        Parser multiply = PS.SetType(PS.ManySeperated(PS.Str("*"), exponent, whitespace), "multiply");
         Parser divide = PS.Choice(PS.SetType(PS.SequenceEat(whitespace, multiply, PS.Str("/"), multiply), "divide"), multiply);
         return PS.SetType(PS.ManySeperated(PS.Choice(PS.Str("+"), PS.Str("-")), divide, whitespace), "add")(s);
     }

@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using GrammarTree = ParserCombinator.GrammarTree;
+using ParserRes = ParserCombinator.ParserRes;
 
 public class Evaluators {
 
@@ -53,6 +54,8 @@ public class Evaluators {
 					if(child.data != "*") res *= Calculation(child);
 				}
 				return res;
+			case "exponent":
+				return Calculation(tree.children.First.Value) ^ Calculation(tree.children.First.Next.Next.Value);
 			case "divide":
 				res = Calculation(tree.children.First.Value);
 				Value divide = Calculation(tree.children.First.Next.Next.Value);
@@ -63,6 +66,7 @@ public class Evaluators {
 				if(Data.variables.ContainsKey(tree.data)) return Data.variables[tree.data];
 				if(Data.factors.ContainsKey(tree.data)) return new Value(Data.factors[tree.data]);
 				if(Data.constants.ContainsKey(tree.data)) return Data.constants[tree.data];
+				if(Data.find.ContainsKey(tree.data)) return Data.find[tree.data];
 				throw new Exception("Could not find variable " + tree.data);
 			case "sin":
 				return Commands.Sin(Calculation(tree.children.First.Next.Value));
@@ -70,6 +74,12 @@ public class Evaluators {
 				return Commands.Cos(Calculation(tree.children.First.Next.Value));
 			case "tan":
 				return Commands.Tan(Calculation(tree.children.First.Next.Value));
+			case "sqrt":
+				return Commands.Sqrt(Calculation(tree.children.First.Next.Value));
+			case "log":
+				return Commands.Log(Calculation(tree.children.First.Next.Value));
+			case "find":
+				return Commands.Find(tree.children.First.Next.Value);
 		}
 		throw new Exception("Could not evaluate type " + tree.type);
 	}

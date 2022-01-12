@@ -13,11 +13,15 @@ public static class Data {
 	};
 	public static List<String> aliases = new List<string>();
 	public static Dictionary<String, Value> constants = new Dictionary<string, Value>();
+	public static Dictionary<String, Tuple<Dictionary<String, String>, Dictionary<String, String>>> formulas =
+		new Dictionary<string, Tuple<Dictionary<string, string>, Dictionary<string, string>>>(); 
+	public static Dictionary<String, Value> find = new Dictionary<string, Value>();
 
 	public static void LoadLibraries() {
 		LoadFactors();
 		LoadUnits();
 		LoadConstants();
+		LoadFormulas();
 		//foreach(String key in conversions.Keys) GD.Print(key, " ", conversions[key].Item1, " ", conversions[key].Item2, " ", conversions[key].Item3.ToString());
 		SortAliases();
 		//foreach(String a in aliases) GD.Print(a);
@@ -109,6 +113,39 @@ public static class Data {
 				if(line == "") continue;
 				String[] parts = line.Split(" ");
 				constants[parts[0]] = new Value(double.Parse(parts[2]), Evaluators.Unit(Parsers.unit(parts[3]).tree));
+			}
+			fileName = directory.GetNext();
+		}
+		directory.ListDirEnd();
+	}
+
+	private static void LoadFormulas() {
+		Directory directory = new Directory();
+		String dir = "res://Data/Formulas/";
+		directory.Open(dir);
+		directory.ListDirBegin(true, true);
+		String fileName = directory.GetNext();
+		while(fileName != "") {
+			File file = new File();
+			file.Open(dir+fileName, File.ModeFlags.Read);
+			String[] lines = file.GetAsText().Split("\n");
+			String formula = "";
+			foreach(String line in lines) {
+				if(line == "") continue;
+				if(line[0] == '[') {
+					formula = line.Split("]")[0].Substring(1);
+					formulas[formula] = new Tuple<Dictionary<string, string>, Dictionary<string, string>>(
+						new Dictionary<String, String>(), new Dictionary<String, String>());
+				} else if(line[0] == '#') continue;
+				else if(line[0] == '$'){
+					String[] parts = line.Substring(1).Split("=");
+					parts[0].Trim();
+					formulas[formula].Item2[parts[0]] = parts[1];
+				} else {
+					String[] parts = line.Split("=");
+					parts[0].Trim();
+					formulas[formula].Item1[parts[0]] = parts[1];
+				}
 			}
 			fileName = directory.GetNext();
 		}
