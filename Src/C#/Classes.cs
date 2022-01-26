@@ -4,13 +4,13 @@ using System.Collections.Generic;
 
 
 public class Unit {
-	Dictionary<String, int> parts = new Dictionary<string, int>();
+	Dictionary<String, float> parts = new Dictionary<string, float>();
 
-	public Unit(String k = "", int p = 1) {
+	public Unit(String k = "", float p = 1f) {
 		if(k != "" && k != "1")  parts[k] = p;
 	}
 
-	public Unit(Dictionary<String, int> parts) {
+	public Unit(Dictionary<String, float> parts) {
 		foreach(String key in parts.Keys) this.parts[key] = parts[key];
 	}
 
@@ -18,9 +18,9 @@ public class Unit {
 		return new Unit(parts);
 	}
 
-	public int Count() {
-		int res = 0;
-		foreach(int power in parts.Values) res += Math.Abs(power);
+	public float Count() {
+		float res = 0;
+		foreach(float power in parts.Values) res += Math.Abs(power);
 		return res;
 	}
 
@@ -36,11 +36,10 @@ public class Unit {
 		foreach(String key in parts.Keys) {
 			if(parts[key] > 0) {
 				top += "*" + key;
-				if(parts[key] > 1) top += "^" + parts[key].ToString();
-			}
-			else {
+				if(parts[key] != 1) top += "^" + parts[key].ToString();
+			} else {
 				bottom += "*" + key;
-				if(parts[key] < -1) bottom += "^" + (-parts[key]).ToString();
+				if(parts[key] != -1) bottom += "^" + (-parts[key]).ToString();
 			}
 		}
 		if(top != "") top = top.Substring(1);
@@ -65,16 +64,16 @@ public class Unit {
 		return res.ToString();
 	}
 
-	public void SetUnit(string unit, int power) {
+	public void SetUnit(string unit, float power) {
 		parts[unit] = power;
 	}
 
-	public int GetUnit(String unit) {
+	public float GetUnit(String unit) {
 		if(!parts.ContainsKey(unit)) return 0;
 		return parts[unit];
 	}
 
-	public void ChangeUnit(String unit, int power) {
+	public void ChangeUnit(String unit, float power) {
 		parts[unit] = power + GetUnit(unit);
 	}
 
@@ -96,7 +95,7 @@ public class Unit {
 		Unit unit = new Unit();
 		foreach(String key in GetKeys()) {
 			String label = key;
-			int power = parts[key];
+			float power = parts[key];
 			if(!Data.conversions.ContainsKey(label) && label.Length > 1 && Data.prefixes.ContainsKey(label[0])) {
 				resFactor *= Math.Pow(10, Data.prefixes[label[0]]*power);
 				label = label.Substring(1);
@@ -128,6 +127,25 @@ public class Unit {
 		return parts.Count == 0;
 	}
 
+	public string GetFirst() {
+		foreach(String key in parts.Keys) return key;
+		return "";
+	}
+
+	public bool IsAdditive() {
+		if(parts.Count != 1) return false;
+		if(!Data.additiveConversions.ContainsKey(GetFirst())) return false;
+		return parts[GetFirst()] == 1;
+	}
+	
+	public Tuple<double, double> ConvertFromAdditive() {
+		if(!IsAdditive()) throw new Exception("Is not additive");
+		String unit = GetFirst();
+		parts.Remove(unit);
+		parts[Data.additiveConversions[unit].Item3] = 1;
+		return new Tuple<double, double>(Data.additiveConversions[unit].Item1, Data.additiveConversions[unit].Item2);
+	}
+
 	public static Unit operator +(Unit a, Unit b) {
 		Unit res = a.Clone();
 		foreach(String key in b.parts.Keys) res.ChangeUnit(key, b.parts[key]);
@@ -143,17 +161,17 @@ public class Unit {
 		return (-1)*a;
 	}
 
-	public static Unit operator *(Unit a, int b) {
+	public static Unit operator *(Unit a, float b) {
 		Unit res = a.Clone();
 		foreach(String key in res.GetKeys()) res.parts[key] *= b;
 		return res;
 	}
 
-	public static Unit operator *(int a, Unit b) {
+	public static Unit operator *(float a, Unit b) {
 		return b*a;
 	}
 
-	public static Unit operator /(Unit a, int b) {
+	public static Unit operator /(Unit a, float b) {
 		Unit res = a.Clone();
 		foreach(String key in res.GetKeys()) res.parts[key] /= b;
 		return res;
@@ -175,7 +193,7 @@ public class Unit {
 
 	public static bool operator <(Unit a, Unit b) {
 		foreach(String key in a.parts.Keys) {
-			int aPower = a.GetUnit(key); int bPower = b.GetUnit(key);
+			float aPower = a.GetUnit(key); float bPower = b.GetUnit(key);
 			if(Math.Sign(aPower) != Math.Sign(bPower) || Math.Abs(aPower) >= Math.Abs(bPower)) return false;
 		}
 		return true;
@@ -187,7 +205,7 @@ public class Unit {
 
 	public static bool operator <=(Unit a, Unit b) {
 		foreach(String key in a.parts.Keys) {
-			int aPower = a.GetUnit(key); int bPower = b.GetUnit(key);
+			float aPower = a.GetUnit(key); float bPower = b.GetUnit(key);
 			if(Math.Sign(aPower) != Math.Sign(bPower) || Math.Abs(aPower) > Math.Abs(bPower)) return false;
 		}
 		return true;
@@ -210,8 +228,12 @@ public struct Value {
 	}
 
 	public void ConvertToSI() {
-		value *= unit.ConvertToSI();
+		if(unit.IsAdditive()) {
+			Tuple<double, double> res = unit.ConvertFromAdditive();
+			value = res.Item1 + res.Item2*value;
+		} else value *= unit.ConvertToSI();
 	}
+
 
 	public Value(double value) {
 		this.value = value;
@@ -225,7 +247,7 @@ public struct Value {
 
 	public String ToString() {
 		String unitString = " " + unit.GetReadeable();
-		int power = (int)Math.Floor(Math.Log10(value));
+		float power = (float)Math.Floor(Math.Log10(Math.Abs(value)));
 		if(value == 0) power = 0;
 		power -= power%3;
 		String powerString = "*10^" + power.ToString();
@@ -249,8 +271,7 @@ public struct Value {
 	}
 
 	public static Value operator *(Value a, double b) {
-		a.value *= b;
-		return a;
+		return new Value(a.value*b, a.unit);
 	}
 
 	public static Value operator *(double a, Value b) {
@@ -279,10 +300,8 @@ public struct Value {
 
 	public static Value operator ^(Value a, Value b) {
 		if(!b.unit.IsOne()) throw new Exception("Cant exponentiate with non one unit");
-		if(a.unit.IsOne() && Math.Abs(b.value - Math.Floor(b.value)) > 1e-200)
-			throw new Exception("Cant exponentiate non one unit in non integers");
-		a.value = Math.Pow(a.value, Math.Floor(b.value));
-		a.unit *= (int)b.value;
+		a.value = Math.Pow(a.value, b.value);
+		a.unit *= (float)b.value;
 		return a;
 	}
 

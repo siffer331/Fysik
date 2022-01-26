@@ -18,7 +18,7 @@ public class Evaluators {
 				return res;
 			case "unit_exponent":
 				return Unit(tree.children.First.Value) *
-				int.Parse(tree.children.First.Next.Next.Value.data);
+				float.Parse(tree.children.First.Next.Next.Value.data);
 			case "word":
 				return new Unit(tree.data);
 		}

@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 using ParserRes = ParserCombinator.ParserRes;
 using GrammarTree = ParserCombinator.GrammarTree;
 
@@ -66,21 +67,59 @@ public static class Commands {
 	public static Value Find(GrammarTree variable) {
 		if(Data.variables.ContainsKey(variable.data)) return Data.variables[variable.data];
 		bool progress = true;
+		List<String> ends = new List<string>{"", "."+Data.delta1, "."+Data.delta2};
+		if(variable.data.Contains(".")) ends.Add("."+variable.data.Split(".")[1]);
 		while(progress) {
 			progress = false;
-			foreach(String formula in Data.formulas.Keys) {
-				int count = 0;
-				String missing = "";
-				foreach(String v in Data.formulas[formula].Item1.Keys) {
-					if(HasVariable(v)) count++;
-					else missing = v;
+			List<String> keys = new List<string>();
+			foreach(String key in Data.find.Keys) keys.Add(key);
+			foreach(String key in Data.variables.Keys) keys.Add(key);
+			foreach(String v in keys) {
+				String d1 = "";
+				String d2 = "";
+				String delta = "";
+				if(v[0] == 'Δ') {
+					delta = v;
+					d1 = delta.Substring(1)+"."+Data.delta1;
+					d2 = delta.Substring(1)+"."+Data.delta2;
+				} else if(v.Contains(".") && v.Split(".")[1] == Data.delta1) {
+					d1 = v;
+					d2 = v.Split(".")[0]+"."+Data.delta2;
+					delta = "Δ"+v.Split(".")[0];
+				} else if(v.Contains(".") && v.Split(".")[1] == Data.delta2) {
+					d1 = v.Split(".")[0]+"."+Data.delta1;
+					d2 = v;
+					delta = "Δ"+v.Split(".")[0];
 				}
-				if(count+1 == Data.formulas[formula].Item1.Count) {
-					progress = true;
-					foreach(String optional in Data.formulas[formula].Item2.Keys)
-						if(!HasVariable(optional)) Data.find[optional] = GetValue(Data.formulas[formula].Item2[optional]);
-					Data.find[missing] = GetValue(Data.formulas[formula].Item1[missing]);
-					if(missing == variable.data) break;
+				int count = 0;
+				if(HasVariable(d1)) count++;
+				if(HasVariable(d2)) count++;
+				if(HasVariable(delta)) count++;
+				if(count != 2) continue;
+				if(!HasVariable(d1)) Data.find[d1] = GetVariable(d2) - GetVariable(delta);
+				if(!HasVariable(d2)) Data.find[d2] = GetVariable(d1) + GetVariable(delta);
+				if(!HasVariable(delta)) Data.find[delta] = GetVariable(d2) - GetVariable(d1);
+			}
+			foreach(String formula in Data.formulas.Keys) {
+				foreach(String end in ends) {
+					int count = 0;
+					String missing = "";
+					bool used = false;
+					foreach(String v in Data.formulas[formula].Item1.Keys) {
+						if(HasVariable(v+end)) {
+							count++;
+							used = true;
+						} else if(HasVariable(v)) count++;
+						else missing = v;
+					}
+					if(count+1 == Data.formulas[formula].Item1.Count && used) {
+						progress = true;
+						foreach(String optional in Data.formulas[formula].Item2.Keys)
+							if(!HasVariable(optional)) Data.find[optional] = GetValue(Data.formulas[formula].Item2[optional]);
+						String form = Data.formulas[formula].Item1[missing];
+						if(end != "") form = GetForm(form, end);
+						Data.find[missing+end] = GetValue(form);
+					}
 				}
 			}
 		}
@@ -92,11 +131,28 @@ public static class Commands {
 		return Data.variables.ContainsKey(variable) || Data.find.ContainsKey(variable);
 	}
 
+	public static Value GetVariable(String variable) {
+		if(Data.variables.ContainsKey(variable)) return Data.variables[variable];
+		if(Data.find.ContainsKey(variable)) return Data.find[variable];
+		throw new Exception("Cant find variable");
+	}
+
 	public static Value GetValue(String calculation) {
 		ParserRes result = Parsers.calculation(calculation);
 		if(!result.succes) throw new Exception(result.error);
 		if(result.rest != "") throw new Exception("Could not parse " + result.rest);
 		return Evaluators.Calculation(result.tree);
+	}
+
+	public static String GetForm(String form, String end) {
+		ParserRes result = Parsers.calculation(form);
+		AddEnd(result.tree, end);
+		return result.tree.Read();
+	}
+
+	public static void AddEnd(GrammarTree tree, String end) {
+		if(tree.type == "word" && HasVariable(tree.data+end)) tree.data += end;
+		foreach(GrammarTree child in tree.children) AddEnd(child, end);
 	}
 
 

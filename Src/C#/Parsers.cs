@@ -15,9 +15,10 @@ public static class Parsers {
 	public static Parser rationalComplete = PS.Choice(PS.Concatenate(PS.SequenceEat(whitespace, rational, PS.Str("e"), integer), "number"), rational);
     public static ParserGenerator parenthesis = PS.BetweenStr("(", ")", whitespace);
     public static ParserGenerator brackets = PS.BetweenStr("[", "]", whitespace);
-	public static ParserGenerator colon = (Parser f) => PS.Choice(f, PS.GetChild(PS.SequenceEat(whitespace, f, PS.Str(":")), 0));
+	public static ParserGenerator colon = (Parser f) => PS.GetChild(PS.SequenceEat(whitespace, f, PS.Choice(PS.Str(":"), whitespace)), 0);
 	public static Parser word = PS.Concatenate(PS.Many(PS.Letter), "word");
-	public static Parser name = PS.Concatenate(PS.Many(PS.Choice(PS.Letter, PS.Digit, PS.Symbols("_"))), "word");
+	public static Parser sword = PS.Concatenate(PS.Many(PS.Choice(PS.Letter, PS.Digit, PS.Symbols("_"))), "word");
+	public static Parser name = PS.Choice(PS.Concatenate(PS.Sequence(sword, PS.Str("."), sword), "word"), sword);
 
 	public static Parser unitPart = PS.Choice(PS.SetType(PS.SequenceEat(whitespace, word, PS.Str("^"), integer), "unit_exponent"), word);
 	public static Parser unitMultiply = PS.SetType(PS.ManySeperated(PS.Str("*"), unitPart, whitespace), "unit_multiply");
@@ -42,10 +43,11 @@ public static class Parsers {
         return PS.SetType(PS.ManySeperated(PS.Choice(PS.Str("+"), PS.Str("-")), divide, whitespace), "add")(s);
     }
 
-	public static Parser setVariable = PS.SetType(PS.SequenceEat(whitespace, word, PS.Str("="), calculation), "set_variable");
-	public static Parser dealloc = function(word, "dealloc");
+	public static Parser setVariable = PS.SetType(PS.SequenceEat(whitespace, name, PS.Str("="), calculation), "set_variable");
+	public static Parser dealloc = function(name, "dealloc");
 	public static Parser to = function(PS.SequenceEat(whitespace,calculation, PS.Str(","), unit), "to");
-	public static Parser reset = PS.SetType(PS.Sequence(PS.Str("reset("), whitespace, PS.Str(")")), "reset");
+	public static Parser reset = function(whitespace, "reset");
+	public static Parser delta = function(PS.SequenceEat(whitespace, name, PS.Str(","), name), "delta");
 
-	public static Parser run = colon(PS.Choice(setVariable, dealloc, reset, to, calculation));
+	public static Parser run = colon(PS.Choice(delta, setVariable, dealloc, reset, to, calculation));
 }

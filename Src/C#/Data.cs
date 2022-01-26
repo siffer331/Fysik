@@ -16,6 +16,11 @@ public static class Data {
 	public static Dictionary<String, Tuple<Dictionary<String, String>, Dictionary<String, String>>> formulas =
 		new Dictionary<string, Tuple<Dictionary<string, string>, Dictionary<string, string>>>(); 
 	public static Dictionary<String, Value> find = new Dictionary<string, Value>();
+	public static Dictionary<String, Tuple<double, double, String>> additiveConversions =
+		new Dictionary<string, Tuple<double, double, string>>();
+
+	public static String delta1 = "1";
+	public static String delta2 = "2";
 
 	public static void LoadLibraries() {
 		LoadFactors();
@@ -25,10 +30,14 @@ public static class Data {
 		//foreach(String key in conversions.Keys) GD.Print(key, " ", conversions[key].Item1, " ", conversions[key].Item2, " ", conversions[key].Item3.ToString());
 		SortAliases();
 		//foreach(String a in aliases) GD.Print(a);
+		/*foreach(String key in formulas.Keys) {
+			GD.Print(key);
+			foreach(String variable in formulas[key].Item1.Keys) GD.Print("   ", variable, "=", formulas[key].Item1[variable]);
+		}*/
 	}
 
 	public static void SortAliases() {
-		aliases.Sort((x, y) => conversions[y].Item2.Count() - conversions[x].Item2.Count());
+		aliases.Sort((x, y) => (int)(conversions[y].Item2.Count() - conversions[x].Item2.Count()));
 	}
 
 	private static void LoadFactors() {
@@ -65,7 +74,10 @@ public static class Data {
 				if(line == "") continue;
 				String[] parts = line.Split(" ");
 				String[] components = new String[] {"1", "", "1", ""};
-				if(parts.Length == 3) {
+				if(parts.Length == 1) {
+					conversions[parts[0]] = new Tuple<double, Unit>(1, new Unit(parts[0]));
+					continue;
+				} else if(parts.Length == 3) {
 					components[1] = parts[0]; components[3] = parts[2];
 				} else if(parts.Length == 4) {
 					if(parts[0] == "SI") {
@@ -81,8 +93,16 @@ public static class Data {
 				} else if(parts.Length == 5) {
 					components[0] = parts[0]; components[1] = parts[1]; components[2] = parts[3]; components[3] = parts[4];
 				} else if(parts.Length == 6) {
-					double fac = GetFactor(parts[4])/GetFactor(parts[1]);
-					conversions[parts[2]] = new Tuple<double, Unit>(fac, new Unit(parts[5]));
+					if(parts[0] == "pure") {
+						double fac = GetFactor(parts[4])/GetFactor(parts[1]);
+						conversions[parts[2]] = new Tuple<double, Unit>(fac, new Unit(parts[5]));
+					} else {
+						additiveConversions[parts[0]] = new Tuple<double, double, string>(
+							GetFactor(parts[2]),
+							GetFactor(parts[4]),
+							parts[5]
+						);
+					}
 					continue;
 				}
 
@@ -139,11 +159,11 @@ public static class Data {
 				} else if(line[0] == '#') continue;
 				else if(line[0] == '$'){
 					String[] parts = line.Substring(1).Split("=");
-					parts[0].Trim();
+					parts[0] = parts[0].Trim();
 					formulas[formula].Item2[parts[0]] = parts[1];
 				} else {
 					String[] parts = line.Split("=");
-					parts[0].Trim();
+					parts[0] = parts[0].Trim();
 					formulas[formula].Item1[parts[0]] = parts[1];
 				}
 			}

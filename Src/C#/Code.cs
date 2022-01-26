@@ -27,33 +27,56 @@ public class Code : Control {
 		if(inputEvent.IsActionPressed("run_line")) {
 			RunLine();
 			undo = true;
+		} if(inputEvent.IsActionPressed("run")) {
+			RunAll();
 		}
 	}
 
-	public void RunLine() {
-		int lineNumber = code.CursorGetLine();
+	public void RunAll() {
+		int line = code.CursorGetLine();
+		int column = code.CursorGetColumn();
+		for(int i = 0; i < code.GetLineCount(); i++) {
+			int r = RunLine(i);
+			if(i < line) line += r;
+		}
+		code.CursorSetLine(line);
+		code.CursorSetColumn(column);
+	}
+
+	public int RunLine(int lineNumber = -1) {
+		if(lineNumber == -1) lineNumber = code.CursorGetLine();
+		int curserLine = code.CursorGetLine();
+		int cursorColumn = code.CursorGetColumn();
 		String line = code.GetLine(lineNumber);
 		String result = EvaluateLine(line);
+		int change = 0;
 		if(result != "") {
 			code.CursorSetColumn(line.Length);
-			if(
-				lineNumber < code.GetLineCount()-1 &&
-				code.GetLine(lineNumber+1).Length > 1 && code.GetLine(lineNumber+1).Substring(0,2) == "//"
-			) {
-				String text = "";
-				String[] lines = code.Text.Split("\n");
-				for(int i = 0; i < lines.Length; i++) {
-					if(i != lineNumber+1) text += lines[i] + "\n";
+			String text = "";
+			for(int i = 0; i < code.GetLineCount(); i++) {
+				String l = code.GetLine(i);
+				if(i == lineNumber+1 && l.Length > 1 && l.Substring(0,2) == "//") change = -1;
+				else text += l + "\n";
+				if(i == lineNumber) {
+					String trim = line.Trim();
+					if(trim[trim.Length-1] != ':') {
+						text += "//" + result + "\n";
+						change += 1;
+					}
 				}
-				text = text.Substring(0, text.Length-1);
-				code.Text = text;
-				code.CursorSetLine(lineNumber);
-				code.CursorSetColumn(line.Length);
 			}
-			if(line == "" || line[line.Length-1] != ':') code.InsertTextAtCursor("\n//" + result);
-			code.CursorSetLine(lineNumber);
-			code.CursorSetColumn(line.Length);
+			text = text.Substring(0, text.Length-1);
+			code.Text = text;
 		} 
+		code.CursorSetLine(curserLine);
+		code.CursorSetColumn(cursorColumn);
+		return change;
+	}
+
+	public String DemonstrateLine(String line) {
+		ParserRes parsingResult = Test.run(line);
+		if(!parsingResult.succes) return parsingResult.error;
+		return parsingResult.rest + "\n" + parsingResult.tree.ToIndentedString();
 	}
 
 	public String EvaluateLine(String line) {
@@ -81,6 +104,11 @@ public class Code : Control {
 						value = Evaluators.Calculation(parsingResult.tree.children.First.Next.Value.children.First.Value);
 						Unit unit = Evaluators.Unit(parsingResult.tree.children.First.Next.Value.children.First.Next.Next.Value);
 						return Commands.To(value, unit);
+					case "delta":
+						GrammarTree tree = parsingResult.tree.children.First.Next.Value;
+						Data.delta1 = tree.children.First.Value.data;
+						Data.delta2 = tree.children.First.Next.Next.Value.data;
+						return "succes";
 				}
 				return "/Did not recognise tree type " + parsingResult.tree.type;
 			}

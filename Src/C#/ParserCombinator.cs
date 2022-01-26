@@ -18,6 +18,16 @@ public static class ParserCombinator {
 			return res+")";
 		}
 
+		public String ToIndentedString() {
+			String res = "("+type+" "+data+":";
+			foreach(GrammarTree child in children) {
+				String[] parts = child.ToString().Split("\n");
+				foreach(String line in parts) res += "\n  " + line + "";
+				res += ",";
+			}
+			return res+"\n)";
+		}
+
 		public String Read() {
 			if(children.Count == 0) return data;
 			String res = "";
