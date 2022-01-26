@@ -3,7 +3,7 @@ extends Control
 
 func _ready() -> void:
 	var category_load = load("res://Src/RightPanel/Category.tscn")
-	for category in Data.categories:
+	for category in Global.categories:
 		var category_node: Control = category_load.instance()
 		category_node.init(category)
 		$HeaderSplit/Margin/Scroll/Split.add_child(category_node)

@@ -1,3 +1,4 @@
+using static Godot.GD;
 using Godot;
 using System;
 using System.Collections.Generic;
@@ -7,14 +8,23 @@ using GrammarTree = ParserCombinator.GrammarTree;
 public class Code : Control {
 
 	[Export]
-	NodePath codePath;
+	public NodePath codePath;
+	[Export]
+	public NodePath panelPath;
+	[Export]
+	public NodePath exportPath;
+
+	LeftPanel panel;
 	TextEdit code;
+	Popup export;
 	bool undo = false;
 
 
 	public override void _Ready() {
 		Data.LoadLibraries();
-		code = GetNode(codePath) as TextEdit;
+		code = GetNode<TextEdit>(codePath);
+		panel = GetNode<LeftPanel>(panelPath);
+		export = GetNode<Popup>(exportPath);
 
 		code.AddColorRegion("///", "", new Color(.6f,.3f,.3f));
 		code.AddColorRegion("//", "", new Color(.4f,.4f,.8f));
@@ -27,9 +37,8 @@ public class Code : Control {
 		if(inputEvent.IsActionPressed("run_line")) {
 			RunLine();
 			undo = true;
-		} if(inputEvent.IsActionPressed("run")) {
-			RunAll();
-		}
+		} if(inputEvent.IsActionPressed("run")) RunAll();
+		if(inputEvent.IsActionPressed("export")) Export();
 	}
 
 	public void RunAll() {
@@ -79,6 +88,41 @@ public class Code : Control {
 		return parsingResult.rest + "\n" + parsingResult.tree.ToIndentedString();
 	}
 
+	public void Export() {
+		String res = "";
+		foreach(String line in code.Text.Split("\n")) {
+			if(line == "" || line[0] == '#' || (line.Length > 1 && line.Substring(0,2) == "//")) continue;
+			if(line[0] == '%') {
+				res += line.Substring(1) + "\n";
+				continue;
+			}
+			ParserRes parsingResult = Parsers.run(line);
+			if(!parsingResult.succes || parsingResult.rest != "") continue;
+
+			try {
+				switch(parsingResult.tree.type) {
+					case "add":
+						Value result = Evaluators.Calculation(parsingResult.tree);
+						res += "$" + result.ToLatex() + "$\n";
+						continue;
+					case "set_variable":
+						String variableName = parsingResult.tree.children.First.Value.data;
+						Value value = Evaluators.Calculation(parsingResult.tree.children.First.Next.Next.Value);
+						res += "$"+variableName + " = " + value.ToLatex() + "$\n";
+						continue;
+					case "to":
+						value = Evaluators.Calculation(parsingResult.tree.children.First.Next.Value.children.First.Value);
+						Unit unit = Evaluators.Unit(parsingResult.tree.children.First.Next.Value.children.First.Next.Next.Value);
+						res += "$" + Commands.To(value, unit).ToLatex() + "$\n";
+						continue;
+				}
+			} catch(Exception e) {}
+		}
+		foreach(String character in Data.latexCharacters.Keys) res.Replace(character, Data.latexCharacters[character] + " ");
+		export.GetNode<TextEdit>("Margin/Text").Text = res;
+		export.Popup_();
+	}
+
 	public String EvaluateLine(String line) {
 		if(line != "" && line[0] != '#' && line[0] != '%' && (line.Length < 2 || line.Substring(0,2) != "//")) {
 			ParserRes parsingResult = Parsers.run(line);
@@ -94,6 +138,7 @@ public class Code : Control {
 						String variableName = parsingResult.tree.children.First.Value.data;
 						Value value = Evaluators.Calculation(parsingResult.tree.children.First.Next.Next.Value);
 						Data.variables[variableName] = value;
+						panel.DisaplyVariables();
 						return variableName + " has been set to " + value.ToString();
 					case "dealloc":
 						variableName = parsingResult.tree.children.First.Next.Value.data;
@@ -103,7 +148,7 @@ public class Code : Control {
 					case "to":
 						value = Evaluators.Calculation(parsingResult.tree.children.First.Next.Value.children.First.Value);
 						Unit unit = Evaluators.Unit(parsingResult.tree.children.First.Next.Value.children.First.Next.Next.Value);
-						return Commands.To(value, unit);
+						return Commands.To(value, unit).ToString();
 					case "delta":
 						GrammarTree tree = parsingResult.tree.children.First.Next.Value;
 						Data.delta1 = tree.children.First.Value.data;
@@ -113,7 +158,7 @@ public class Code : Control {
 				return "/Did not recognise tree type " + parsingResult.tree.type;
 			}
 			catch(Exception e) {
-				//GD.Print(e.ToString());
+				//Print(e.ToString());
 				return "/" + e.Message;
 			}
 		}
@@ -123,6 +168,10 @@ public class Code : Control {
 	public void OnTextEditTextChanged() {
 		if(undo) code.Undo();
 		undo = false;
+	}
+
+	public void Write(String text) {
+		code.InsertTextAtCursor(text);
 	}
 
 }

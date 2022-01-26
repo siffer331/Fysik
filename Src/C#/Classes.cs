@@ -49,7 +49,26 @@ public class Unit {
 		return top + "/" + bottom;
 	}
 
-	public String GetReadeable() {
+	public String ToLatex() {
+		String top = "";
+		String bottom = "";
+		foreach(String key in parts.Keys) {
+			if(parts[key] > 0) {
+				top += "\\cdot" + key;
+				if(parts[key] != 1) top += "^{" + parts[key].ToString() + "}";
+			} else {
+				bottom += "\\cdot" + key;
+				if(parts[key] != -1) bottom += "^{" + (-parts[key]).ToString() + "}";
+			}
+		}
+		if(top != "") top = top.Substring(5);
+		if(bottom != "") bottom = bottom.Substring(5);
+		if(top == "") top = "1";
+		if(bottom == "") return top;
+		return "\\frac{" + top + "}{" + bottom + "}";
+	}
+
+	public Unit GetReadeable() {
 		Unit res = Clone();
 		foreach(String alias in Data.aliases) {
 			while(res >= Data.conversions[alias].Item2) {
@@ -61,7 +80,7 @@ public class Unit {
 				res.ChangeUnit(alias, -1);
 			}
 		}
-		return res.ToString();
+		return res;
 	}
 
 	public void SetUnit(string unit, float power) {
@@ -246,7 +265,7 @@ public struct Value {
 	}
 
 	public String ToString() {
-		String unitString = " " + unit.GetReadeable();
+		String unitString = " " + unit.GetReadeable().ToString();
 		float power = (float)Math.Floor(Math.Log10(Math.Abs(value)));
 		if(value == 0) power = 0;
 		power -= power%3;
@@ -262,7 +281,27 @@ public struct Value {
 			powerString = "";
 		}
 		if(unit.IsOne()) unitString = "";
-		return (factor).ToString() + powerString + unitString;
+		return factor.ToString() + powerString + unitString;
+	}
+
+	public String ToLatex() {
+		String unitString = " " + unit.GetReadeable().ToLatex();
+		float power = (float)Math.Floor(Math.Log10(Math.Abs(value)));
+		if(value == 0) power = 0;
+		power -= power%3;
+		String powerString = "\\cdot 10{" + power.ToString() + "}";
+		double factor = value/Math.Pow(10, power);
+		if(power == 0) powerString = "";
+		if(power == -3) {
+			factor *= 0.001d;
+			powerString = "";
+		}
+		if(power == 3) {
+			factor *= 1000d;
+			powerString = "";
+		}
+		if(unit.IsOne()) unitString = "";
+		return factor.ToString() + powerString + unitString;
 	}
 
 	public static Value operator +(Value a, Value b) {

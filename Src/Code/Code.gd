@@ -56,16 +56,16 @@ onready var code: TextEdit = get_node(code_path)
 
 
 func _ready() -> void:
-	Data.connect("write", self, "_on_Data_write")
+	Global.connect("write", self, "_on_Global_write")
 	code = code as TextEdit
 	code.add_color_region("///", "", Color(.6,.3,.3))
 	code.add_color_region("//", "", Color(.4,.4,.8))
 	code.add_color_region("#", "", Color(.4,.4,.4))
 	code.add_color_region("%", "", Color(.4,.7,.4))
 	code.add_color_region("[", "]", Color(.4,.5,.8))
-	for constant in Data.constants:
+	for constant in Global.constants:
 		code.add_keyword_color(constant, Color(.7,.7,.9))
-	for formula in Data.formulas:
+	for formula in Global.formulas:
 		code.add_keyword_color(formula, Color(.7,.5,.9))
 	for command in COMMANDS:
 		code.add_keyword_color(command, Color(.3,.7,.7))
@@ -155,7 +155,7 @@ func eval(line: String, save := false) -> Array:
 			index += 1
 		if parts[index][1] == TYPES.WORD:
 			if index != len(parts) - 1 and parts[index+1][1] == TYPES.PARENTHETHIES:
-				if parts[index][0] in COMMANDS or parts[index][0] in Data.formulas:
+				if parts[index][0] in COMMANDS or parts[index][0] in Global.formulas:
 					var args = parts[index+1][0].substr(1,len(parts[index+1][0])-2)
 					var res = command(parts[index][0], args, save)
 					if res[0] is String and res[0] == "error":
@@ -171,12 +171,12 @@ func eval(line: String, save := false) -> Array:
 				else:
 					return ["/Cant find command " + parts[index][0]]
 			else:
-				if parts[index][0] in Data.variables:
-					parts[index] = [Data.variables[parts[index][0]], TYPES.VALUE]
-				elif parts[index][0] in Data.defaults:
-					parts[index] = [Data.defaults[parts[index][0]], TYPES.VALUE]
-				elif parts[index][0] in Data.constants:
-					parts[index] = [Data.constants[parts[index][0]], TYPES.VALUE]
+				if parts[index][0] in Global.variables:
+					parts[index] = [Global.variables[parts[index][0]], TYPES.VALUE]
+				elif parts[index][0] in Global.defaults:
+					parts[index] = [Global.defaults[parts[index][0]], TYPES.VALUE]
+				elif parts[index][0] in Global.constants:
+					parts[index] = [Global.constants[parts[index][0]], TYPES.VALUE]
 				else:
 					return ["/Cant find variable " + parts[index][0]]
 		index += 1
@@ -197,16 +197,16 @@ func eval(line: String, save := false) -> Array:
 			return ["/Cant set variable to empty"]
 		if parts[2][1] != TYPES.VALUE:
 			return ["/Cant set variable to " + parts[2][0]]
-		Data.set_variable(parts[0][0], parts[2][0])
+		Global.set_variable(parts[0][0], parts[2][0])
 		code.add_keyword_color(parts[0][0], Color(.7,.9,.7))
-		Data.exported.append("")
+		Global.exported.append("")
 		if save:
-			Data.exported.append("$"+parts[0][0]+"="+parts[2][0].to_latex()+"$")
+			Global.exported.append("$"+parts[0][0]+"="+parts[2][0].to_latex()+"$")
 		return [parts[0][0] + " has been set to " + str(parts[2][0]), parts[2][0]]
 	if len(parts) == 0:
 		return ["Succesfull", ["", TYPES.EMPTY]]
 	if save and parts[0][1] == TYPES.VALUE:
-		Data.exported.append("$"+parts[0][0].to_latex()+"$")
+		Global.exported.append("$"+parts[0][0].to_latex()+"$")
 	return ["result: " + str(parts[0][0]), parts[0]]
 
 
@@ -273,17 +273,17 @@ func formula(command: String, raw_args: String, save := false) -> Array:
 			)]
 		var keyword = parts[0][0][0]
 		replace[keyword] = arg[1]
-	if not type in Data.formulas[command]["versions"]:
+	if not type in Global.formulas[command]["versions"]:
 		return ["error", "/Cant get " + type]
-	var formula: String = Data.formulas[command]["versions"][type]
+	var formula: String = Global.formulas[command]["versions"][type]
 	for arg in replace:
 		formula = formula.replace(arg, "("+replace[arg]+")")
 	var res = eval(formula)
 	if len(res) == 1:
 		return ["error", res[0]]
 	if save:
-		Data.exported.append("$"+equation_to_latex(Data.formulas[command]["versions"][type])+"$")
-		Data.exported.append("$"+res[0][0]+"="+res[2][0].to_latex()+"$")
+		Global.exported.append("$"+equation_to_latex(Global.formulas[command]["versions"][type])+"$")
+		Global.exported.append("$"+res[0][0]+"="+res[2][0].to_latex()+"$")
 	return [res[1]]
 
 
@@ -331,7 +331,7 @@ static func equation_to_latex(equation: String, debug := false) -> String:
 
 
 func command(command: String, raw_args: String, save := false) -> Array:
-	if command in Data.formulas:
+	if command in Global.formulas:
 		return formula(command, raw_args, save)
 	if COMMANDS[command].args > 0 and raw_args == "":
 		return ["error", "no input recieved"]
@@ -356,13 +356,13 @@ func run_all() -> void:
 
 func export_md() -> void:
 	exporting = true
-	Data.exported = []
+	Global.exported = []
 	run_all()
 	exporting = false
-	for i in range(len(Data.exported)):
-		for replace in Data.latex_characters:
-			Data.exported[i] = Data.exported[i].replace(replace, Data.latex_characters[replace])
-	Data.emit_signal("exporting")
+	for i in range(len(Global.exported)):
+		for replace in Global.latex_characters:
+			Global.exported[i] = Global.exported[i].replace(replace, Global.latex_characters[replace])
+	Global.emit_signal("exporting")
 
 
 func run_line() -> void:
@@ -372,9 +372,9 @@ func run_line() -> void:
 	if exporting:
 		if line != "":
 			if line[0] == "#":
-				Data.exported.append("[//]: # ("+line.substr(1,-1)+")")
+				Global.exported.append("[//]: # ("+line.substr(1,-1)+")")
 			if line[0] == "%":
-				Data.exported.append(line.substr(1,-1))
+				Global.exported.append(line.substr(1,-1))
 	if line != "" and (not line[0] in "#%") and line.substr(0,2) != "//":
 		var res = eval(line, exporting)
 		code.cursor_set_column(len(line))
@@ -404,7 +404,7 @@ func _on_TextEdit_text_changed() -> void:
 		undo = false
 
 
-func _on_Data_write(text: String) -> void:
+func _on_Global_write(text: String) -> void:
 	code.insert_text_at_cursor(text)
 
 

@@ -3,25 +3,26 @@ extends Control
 
 
 func _init():
+	print("test")
 	_get_formulas()
 	_get_symbols()
 	_get_units()
 	#print("Units:")
-	#print(Data.units)
+	#print(Global.units)
 	#print("Derived:")
-	#print(Data.derived)
+	#print(Global.derived)
 	#print("SI:")
-	#print(Data.si)
+	#print(Global.si)
 	#print("Constants")
-	#print(Data.constants)
+	#print(Global.constants)
 	#print("Categories:")
-	#print(Data.categories)
+	#print(Global.categories)
 	#print("Symbols:")
-	#print(Data.symbols)
+	#print(Global.symbols)
 	#print("Formulas")
-	#print(Data.formulas)
+	#print(Global.formulas)
 	#print("Order")
-	print(Data.derived_order)
+	print(Global.derived_order)
 
 class DerivedSorter:
 	static func comparator(a: String, b: String) -> bool:
@@ -29,66 +30,66 @@ class DerivedSorter:
 
 
 func _get_formulas() -> void:
-	var formulas = _get_data("formulas")
+	var formulas = _get_Global("formulas")
 	for formula in formulas:
-		Data.formulas[formula] = {"categories": [], "versions": {}, "defaults": {}}
+		Global.formulas[formula] = {"categories": [], "versions": {}, "defaults": {}}
 		for line in formulas[formula]:
 			if line[0] == "#":
 				line.erase(0,1)
-				Data.formulas[formula].categories.append(line)
+				Global.formulas[formula].categories.append(line)
 			elif line[0] == "$":
 				line.erase(0,1)
 				var sides: Array = line.split("=")
 				var parts: Array = sides[1].split(" ")
-				Data.formulas[formula].defaults[sides[0]] = Value.new(parts[0], "["+parts[1]+"]")
+				Global.formulas[formula].defaults[sides[0]] = Value.new(parts[0], "["+parts[1]+"]")
 			else:
 				var sides = line.split("=")
-				Data.formulas[formula].versions[sides[0]] = sides[1]
+				Global.formulas[formula].versions[sides[0]] = sides[1]
 
 
 func _get_units() -> void:
-	var categories = _get_data("units")
+	var categories = _get_Global("units")
 	for line in categories["constants"]:
 		line = line.split(" ")
-		Data.constants[line[0]] = Value.new(line[2])
+		Global.constants[line[0]] = Value.new(line[2])
 	for category in categories:
 		if category in ["derived", "constants"]:
 			continue
-		Data.categories[category] = []
+		Global.categories[category] = []
 		for i in range(len(categories[category])):
 			var line: Array = categories[category][i].split(" ")
 			if i == 0:
-				Data.categories[category].append(line[0])
-				Data.units[line[0]] = [1, line[0]]
-				Data.si.append(line[0])
+				Global.categories[category].append(line[0])
+				Global.units[line[0]] = [1, line[0]]
+				Global.si.append(line[0])
 			elif i == 1:
-				Data.scaleable.append(line[0])
+				Global.scaleable.append(line[0])
 			else:
-				Data.categories[category].append(line[1])
-				Data.units[line[1]] = [
-					num(line[3])*Data.units[line[4]][0]/num(line[0]),
-					Data.units[line[4]][1]
+				Global.categories[category].append(line[1])
+				Global.units[line[1]] = [
+					num(line[3])*Global.units[line[4]][0]/num(line[0]),
+					Global.units[line[4]][1]
 				]
 	for line in categories["derived"]:
 		line = line.split(" = ")
-		Data.derived[line[0]] = UA.derive(Unit.new(line[1]))
-		Data.scaleable.append(line[0])
-		Data.derived_order.append(line[0])
-	Data.derived_order.sort_custom(DerivedSorter, "comparator")
-	Data.constants.clear()
+		Global.derived[line[0]] = UA.derive(Unit.new(line[1]))
+		Global.scaleable.append(line[0])
+		Global.derived_order.append(line[0])
+	Global.derived_order.sort_custom(DerivedSorter, "comparator")
+	Global.constants.clear()
 	for line in categories["constants"]:
 		line = line.split(" ")
-		Data.constants[line[0]] = Value.new(line[2], "["+line[3]+"]")
-		Data.constants[line[0]]
+		Global.constants[line[0]] = Value.new(line[2], "["+line[3]+"]")
+		Global.constants[line[0]]
 
 
 func _get_symbols() -> void:
-	var symbols = _get_data("symbols")
+	var symbols = _get_Global("symbols")
 	for symbol in symbols:
-		Data.symbols[symbol] = [symbols[symbol][0], symbols[symbol][1].right(6)]
+		Global.symbols[symbol] = [symbols[symbol][0], symbols[symbol][1].right(6)]
 
 
-func _get_data(data_name: String) -> Dictionary:
+func _get_Global(data_name: String) -> Dictionary:
 	var file := File.new()
 	file.open("res://Data/"+data_name+".config", File.READ)
 	var content := file.get_as_text()
@@ -113,6 +114,6 @@ func num(s: String) -> float:
 	for part in s.split("*"):
 		if part.is_valid_float():
 			res *= float(part)
-		elif part in Data.constants:
-			res *= Data.constants[part].get_value()
+		elif part in Global.constants:
+			res *= Global.constants[part].get_value()
 	return res

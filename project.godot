@@ -63,12 +63,12 @@ _global_script_class_icons={
 [application]
 
 config/name="Fysik"
-run/main_scene="res://Src/Main/Main.tscn"
+run/main_scene="res://Src/C#/UI/MainC.tscn"
 config/icon="res://icon.png"
 
 [autoload]
 
-Data="*res://Src/Main/Data.gd"
+Global="*res://Src/Main/Data.gd"
 Commands="*res://Src/Code/Commands.gd"
 
 [input]

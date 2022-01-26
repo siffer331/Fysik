@@ -31,7 +31,7 @@ func to_latex() -> String:
 	for part in u.units:
 		if u.units[part] < 0:
 			var text: String = "\\text{"+part+"}"
-			if part in Data.characters:
+			if part in Global.characters:
 				text = part
 			if u.units[part] != -1:
 				bottom.append(text+"^{"+str(-u.units[part])+"}")
@@ -39,7 +39,7 @@ func to_latex() -> String:
 				bottom.append(text)
 		else:
 			var text: String = "\\text{"+part+"}"
-			if part in Data.characters:
+			if part in Global.characters:
 				text = part
 			if u.units[part] != 1:
 				top.append(text+"^{"+str(u.units[part])+"}")

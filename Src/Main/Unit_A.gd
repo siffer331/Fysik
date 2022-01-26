@@ -4,8 +4,8 @@ extends Node
 
 static func size(a: String) -> int:
 	var count := 0
-	for unit in Data.derived[a].units:
-		count += abs(Data.derived[a].units[unit])
+	for unit in Global.derived[a].units:
+		count += abs(Global.derived[a].units[unit])
 	return count
 
 
@@ -42,8 +42,8 @@ static func equals(a: Unit, b: Unit) -> bool:
 static func get_readable(a: Unit) -> Unit:
 	var res = Unit.new()
 	res.units = a.units.duplicate(true)
-	for derived in Data.derived_order:
-		var u = derive(Data.derived[derived])
+	for derived in Global.derived_order:
+		var u = derive(Global.derived[derived])
 		while dictionary_less(u.units, res.units):
 			res = divide_u(res, u)
 			if not derived in res:
@@ -90,11 +90,11 @@ static func derive(u: Unit) -> Unit:
 	var changed := true
 	for unit in u.units:
 		var val: int = u.units[unit]
-		if unit in Data.derived:
-			for unit2 in Data.derived[unit].units:
+		if unit in Global.derived:
+			for unit2 in Global.derived[unit].units:
 				if not unit2 in res.units:
 					res.units[unit2] = 0
-				res.units[unit2] += val*Data.derived[unit].units[unit2]
+				res.units[unit2] += val*Global.derived[unit].units[unit2]
 		else:
 			if not unit in res.units:
 				res.units[unit] = 0

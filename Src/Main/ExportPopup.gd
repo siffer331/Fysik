@@ -2,11 +2,11 @@ extends WindowDialog
 
 
 func _ready() -> void:
-	Data.connect("exporting", self, "_on_Data_exporting")
+	Global.connect("exporting", self, "_on_Global_exporting")
 
 
-func _on_Data_exporting() -> void:
+func _on_Global_exporting() -> void:
 	$Margin/Text.text = ""
-	for line in Data.exported:
+	for line in Global.exported:
 		$Margin/Text.text += line + "\n"
 	popup()

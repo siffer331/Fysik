@@ -2,7 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 
-public static class Data {
+public static class Data{
 
 	public static Dictionary<String, Value> variables = new Dictionary<string, Value>();
 	public static Dictionary<String, double> factors = new Dictionary<string, double>();
@@ -11,6 +11,8 @@ public static class Data {
 		{'Y', 24}, {'Z', 21}, {'E', 18}, {'P', 15}, {'T', 12}, {'G',  9}, {'M',  6}, {'k',  3}, {'h',  2}, {'D',  1},
 		{'d', -1}, {'c', -2}, {'m', -3}, {'μ', -6}, {'n', -9}, {'p',-12}, {'f',-15}, {'a',-18}, {'z',-21}, {'y',-24}
 	};
+	public static Dictionary<String, String> latexCharacters = new Dictionary<string, string>()
+		{{"π", "\\pi"}, {"Ω", "\\Omega"}, {"μ", "\\mu"}, {"τ", "\\tau"}, {"ε", "\\epsilon"}};
 	public static List<String> aliases = new List<string>();
 	public static Dictionary<String, Value> constants = new Dictionary<string, Value>();
 	public static Dictionary<String, Tuple<Dictionary<String, String>, Dictionary<String, String>>> formulas =

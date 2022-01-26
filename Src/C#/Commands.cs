@@ -17,13 +17,13 @@ public static class Commands {
 		return "Succes";
 	}
 
-	public static String To(Value value, Unit unit) {
+	public static Value To(Value value, Unit unit) {
 		Unit si = unit.Clone();
 		double factor = si.ConvertToSI();
 		if(value.unit != si) throw new Exception("Units does not mach");
 		value.unit = unit;
 		value /= new Value(factor);
-		return value.ToString();
+		return value;
 	}
 
 	public static Value Sin(Value value) {

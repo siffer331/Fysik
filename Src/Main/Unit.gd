@@ -59,27 +59,27 @@ func convert_to_si() -> Array:
 	var factor := 1.0
 	var p := 0
 	for unit in units.keys():
-		if len(unit) > 1 and unit.substr(1,-1) in Data.scaleable and unit[0] in Data.prefixes and not unit in Data.si:
-			p += Data.prefixes[unit[0]]
+		if len(unit) > 1 and unit.substr(1,-1) in Global.scaleable and unit[0] in Global.prefixes and not unit in Global.si:
+			p += Global.prefixes[unit[0]]
 			var si = unit.substr(1,-1)
 			if not si in units:
 				units[si] = 0
 			units[si] += units[unit]
 			units.erase(unit)
 	for unit in units.keys():
-		if unit in Data.units:
-			factor *= pow(Data.units[unit][0], units[unit])
-			var si = Data.units[unit][1]
+		if unit in Global.units:
+			factor *= pow(Global.units[unit][0], units[unit])
+			var si = Global.units[unit][1]
 			if si != unit:
 				if not si in units:
 					units[si] = 0
 				units[si] += units[unit]
 				units.erase(unit)
-		elif unit in Data.derived:
-			for d_unit in Data.derived[unit].units:
+		elif unit in Global.derived:
+			for d_unit in Global.derived[unit].units:
 				if not d_unit in units:
 					units[d_unit] = 0
-				units[d_unit] += Data.derived[unit].units[d_unit]
+				units[d_unit] += Global.derived[unit].units[d_unit]
 				units.erase(unit)
 	_simplify()
 	return [factor, p]

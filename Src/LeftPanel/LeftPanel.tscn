@@ -43,21 +43,21 @@ margin_right = 95.0
 margin_bottom = 558.0
 split_offset = 400
 
-[node name="Variables" type="Control" parent="Margin/Sepperator"]
+[node name="Variables" type="MarginContainer" parent="Margin/Sepperator"]
 margin_right = 90.0
-margin_bottom = 400.0
+margin_bottom = 429.0
 
 [node name="Background" type="ColorRect" parent="Margin/Sepperator/Variables"]
-anchor_right = 1.0
-anchor_bottom = 1.0
+margin_right = 90.0
+margin_bottom = 429.0
 color = Color( 0.14902, 0.14902, 0.164706, 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="HeaderSplit" type="VBoxContainer" parent="Margin/Sepperator/Variables"]
-anchor_right = 1.0
-anchor_bottom = 1.0
+margin_right = 90.0
+margin_bottom = 429.0
 custom_constants/separation = 0
 __meta__ = {
 "_edit_use_anchors_": false
@@ -79,7 +79,7 @@ margin_bottom = 24.0
 [node name="Margin" type="MarginContainer" parent="Margin/Sepperator/Variables/HeaderSplit"]
 margin_top = 24.0
 margin_right = 90.0
-margin_bottom = 400.0
+margin_bottom = 429.0
 size_flags_vertical = 3
 custom_constants/margin_right = 5
 custom_constants/margin_left = 5
@@ -88,7 +88,7 @@ custom_constants/margin_bottom = 5
 [node name="Scroll" type="ScrollContainer" parent="Margin/Sepperator/Variables/HeaderSplit/Margin"]
 margin_left = 5.0
 margin_right = 85.0
-margin_bottom = 371.0
+margin_bottom = 400.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -99,22 +99,22 @@ margin_bottom = 32.0
 rect_min_size = Vector2( 0, 32 )
 size_flags_horizontal = 3
 
-[node name="Characters" type="Control" parent="Margin/Sepperator"]
-margin_top = 412.0
+[node name="Characters" type="MarginContainer" parent="Margin/Sepperator"]
+margin_top = 441.0
 margin_right = 90.0
 margin_bottom = 553.0
 
 [node name="Background" type="ColorRect" parent="Margin/Sepperator/Characters"]
-anchor_right = 1.0
-anchor_bottom = 1.0
+margin_right = 90.0
+margin_bottom = 112.0
 color = Color( 0.14902, 0.14902, 0.164706, 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="HeaderSplit" type="VBoxContainer" parent="Margin/Sepperator/Characters"]
-anchor_right = 1.0
-anchor_bottom = 1.0
+margin_right = 90.0
+margin_bottom = 112.0
 custom_constants/separation = 0
 __meta__ = {
 "_edit_use_anchors_": false
@@ -136,7 +136,7 @@ margin_bottom = 24.0
 [node name="Margin" type="MarginContainer" parent="Margin/Sepperator/Characters/HeaderSplit"]
 margin_top = 24.0
 margin_right = 90.0
-margin_bottom = 141.0
+margin_bottom = 112.0
 size_flags_vertical = 3
 custom_constants/margin_right = 5
 custom_constants/margin_left = 5
@@ -145,7 +145,7 @@ custom_constants/margin_bottom = 5
 [node name="Scroll" type="ScrollContainer" parent="Margin/Sepperator/Characters/HeaderSplit/Margin"]
 margin_left = 5.0
 margin_right = 85.0
-margin_bottom = 112.0
+margin_bottom = 83.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
