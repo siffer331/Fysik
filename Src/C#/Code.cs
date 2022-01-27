@@ -142,9 +142,13 @@ public class Code : Control {
 						return variableName + " has been set to " + value.ToString();
 					case "dealloc":
 						variableName = parsingResult.tree.children.First.Next.Value.data;
-						return Commands.Dealloc(variableName);
+						String res = Commands.Dealloc(variableName);
+						panel.DisaplyVariables();
+						return res;
 					case "reset":
-						return Commands.Reset();
+						String resu = Commands.Reset();
+						panel.DisaplyVariables();
+						return resu;
 					case "to":
 						value = Evaluators.Calculation(parsingResult.tree.children.First.Next.Value.children.First.Value);
 						Unit unit = Evaluators.Unit(parsingResult.tree.children.First.Next.Value.children.First.Next.Next.Value);

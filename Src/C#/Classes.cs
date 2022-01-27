@@ -54,10 +54,10 @@ public class Unit {
 		String bottom = "";
 		foreach(String key in parts.Keys) {
 			if(parts[key] > 0) {
-				top += "\\cdot" + key;
+				top += "\\cdot \\text{" + key + "}";
 				if(parts[key] != 1) top += "^{" + parts[key].ToString() + "}";
 			} else {
-				bottom += "\\cdot" + key;
+				bottom += "\\cdot \\text{" + key + "}";
 				if(parts[key] != -1) bottom += "^{" + (-parts[key]).ToString() + "}";
 			}
 		}
@@ -289,7 +289,7 @@ public struct Value {
 		float power = (float)Math.Floor(Math.Log10(Math.Abs(value)));
 		if(value == 0) power = 0;
 		power -= power%3;
-		String powerString = "\\cdot 10{" + power.ToString() + "}";
+		String powerString = "\\cdot 10^{" + power.ToString() + "}";
 		double factor = value/Math.Pow(10, power);
 		if(power == 0) powerString = "";
 		if(power == -3) {
