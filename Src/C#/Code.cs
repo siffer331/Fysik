@@ -6,33 +6,31 @@ using ParserRes = ParserCombinator.ParserRes;
 using GrammarTree = ParserCombinator.GrammarTree;
 
 public class Code : Control {
-
 	[Export]
 	public NodePath codePath;
 	[Export]
 	public NodePath panelPath;
 	[Export]
 	public NodePath exportPath;
-
+	
 	LeftPanel panel;
 	TextEdit code;
 	Popup export;
 	bool undo = false;
-
-
+	
 	public override void _Ready() {
 		Data.LoadLibraries();
 		code = GetNode<TextEdit>(codePath);
 		panel = GetNode<LeftPanel>(panelPath);
 		export = GetNode<Popup>(exportPath);
-
+	
 		code.AddColorRegion("///", "", new Color(.6f,.3f,.3f));
 		code.AddColorRegion("//", "", new Color(.4f,.4f,.8f));
 		code.AddColorRegion("#", "", new Color(.4f,.4f,.4f));
 		code.AddColorRegion("%", "", new Color(.4f,.7f,.4f));
 		code.AddColorRegion("[", "]", new Color(.4f,.5f,.8f));
 	}
-
+	
 	public override void _Input(InputEvent inputEvent) {
 		if(inputEvent.IsActionPressed("run_line")) {
 			RunLine();
@@ -40,7 +38,7 @@ public class Code : Control {
 		} if(inputEvent.IsActionPressed("run")) RunAll();
 		if(inputEvent.IsActionPressed("export")) Export();
 	}
-
+	
 	public void RunAll() {
 		int line = code.CursorGetLine();
 		int column = code.CursorGetColumn();
@@ -51,7 +49,7 @@ public class Code : Control {
 		code.CursorSetLine(line);
 		code.CursorSetColumn(column);
 	}
-
+	
 	public int RunLine(int lineNumber = -1) {
 		if(lineNumber == -1) lineNumber = code.CursorGetLine();
 		int curserLine = code.CursorGetLine();
@@ -81,13 +79,13 @@ public class Code : Control {
 		code.CursorSetColumn(cursorColumn);
 		return change;
 	}
-
+	
 	public String DemonstrateLine(String line) {
 		ParserRes parsingResult = Test.run(line);
 		if(!parsingResult.succes) return parsingResult.error;
 		return parsingResult.rest + "\n" + parsingResult.tree.ToIndentedString();
 	}
-
+	
 	public void Export() {
 		String res = "";
 		foreach(String line in code.Text.Split("\n")) {
@@ -98,7 +96,6 @@ public class Code : Control {
 			}
 			ParserRes parsingResult = Parsers.run(line);
 			if(!parsingResult.succes || parsingResult.rest != "") continue;
-
 			try {
 				switch(parsingResult.tree.type) {
 					case "add":
@@ -122,13 +119,12 @@ public class Code : Control {
 		export.GetNode<TextEdit>("Margin/Text").Text = res;
 		export.Popup_();
 	}
-
+	
 	public String EvaluateLine(String line) {
 		if(line != "" && line[0] != '#' && line[0] != '%' && (line.Length < 2 || line.Substring(0,2) != "//")) {
 			ParserRes parsingResult = Parsers.run(line);
 			if(!parsingResult.succes) return "/" + parsingResult.ToString();
 			if(parsingResult.rest != "") return "/missplassed text: " + parsingResult.rest;
-
 			try {
 				switch(parsingResult.tree.type) {
 					case "add":
@@ -168,14 +164,26 @@ public class Code : Control {
 		}
 		return "";
 	}
-
+	
 	public void OnTextEditTextChanged() {
 		if(undo) code.Undo();
 		undo = false;
 	}
-
+	
 	public void Write(String text) {
 		code.InsertTextAtCursor(text);
 	}
-
+	
+	private void _on_Run_pressed() {
+		RunAll();
+	}
+	
+	private void _on_Export_pressed() {
+		Export();
+	}
+	
+	private void _on_Import_pressed() {
+		GetNode<WindowDialog>("../../../../ImportPopup").Show();
+	}
 }
+

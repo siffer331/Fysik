@@ -1,0 +1,8 @@
+/home/siffer/Documents/Projects/Fysik/.mono/temp/bin/ExportRelease/Fysik.dll
+/home/siffer/Documents/Projects/Fysik/.mono/temp/bin/ExportRelease/Fysik.pdb
+/home/siffer/Documents/Projects/Fysik/.mono/temp/obj/ExportRelease/Fysik.csproj.AssemblyReference.cache
+/home/siffer/Documents/Projects/Fysik/.mono/temp/obj/ExportRelease/Fysik.AssemblyInfoInputs.cache
+/home/siffer/Documents/Projects/Fysik/.mono/temp/obj/ExportRelease/Fysik.AssemblyInfo.cs
+/home/siffer/Documents/Projects/Fysik/.mono/temp/obj/ExportRelease/Fysik.csproj.CoreCompileInputs.cache
+/home/siffer/Documents/Projects/Fysik/.mono/temp/obj/ExportRelease/Fysik.dll
+/home/siffer/Documents/Projects/Fysik/.mono/temp/obj/ExportRelease/Fysik.pdb

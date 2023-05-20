@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://Src/C#/UI/CodeC#.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Main.tres" type="Theme" id=2]
 [ext_resource path="res://Src/LeftPanel/LeftPanel.tscn" type="PackedScene" id=3]
 [ext_resource path="res://Src/C#/UI/LeftPanel.cs" type="Script" id=4]
+[ext_resource path="res://Src/C#/Import.cs" type="Script" id=5]
 
 [node name="Main" type="Control"]
 anchor_right = 1.0
@@ -59,6 +60,30 @@ margin_bottom = 19.0
 hint_tooltip = "Run all"
 text = " R "
 
+[node name="Space2" type="Control" parent="Main/ToolBar/Split"]
+margin_left = 26.0
+margin_right = 26.0
+margin_bottom = 19.0
+
+[node name="Export" type="Button" parent="Main/ToolBar/Split"]
+margin_left = 30.0
+margin_right = 47.0
+margin_bottom = 19.0
+hint_tooltip = "Export to Latex"
+text = " E "
+
+[node name="Space3" type="Control" parent="Main/ToolBar/Split"]
+margin_left = 51.0
+margin_right = 51.0
+margin_bottom = 19.0
+
+[node name="Import" type="Button" parent="Main/ToolBar/Split"]
+margin_left = 55.0
+margin_right = 67.0
+margin_bottom = 19.0
+hint_tooltip = "Import data"
+text = " I "
+
 [node name="Margin" type="MarginContainer" parent="Main"]
 margin_top = 27.0
 margin_right = 1024.0
@@ -77,7 +102,7 @@ split_offset = 100
 
 [node name="LeftPanel" parent="Main/Margin/Split" instance=ExtResource( 3 )]
 script = ExtResource( 4 )
-codePath = NodePath("../Code")
+codePath = null
 
 [node name="Code" parent="Main/Margin/Split" instance=ExtResource( 1 )]
 anchor_right = 0.0
@@ -110,3 +135,73 @@ margin_left = 5.0
 margin_top = 5.0
 margin_right = 507.0
 margin_bottom = 320.0
+
+[node name="ImportPopup" type="WindowDialog" parent="."]
+margin_left = 210.0
+margin_top = 141.0
+margin_right = 722.0
+margin_bottom = 466.0
+window_title = "Import"
+script = ExtResource( 5 )
+
+[node name="Margin" type="MarginContainer" parent="ImportPopup"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_constants/margin_right = 5
+custom_constants/margin_top = 5
+custom_constants/margin_left = 5
+custom_constants/margin_bottom = 5
+
+[node name="Split" type="VBoxContainer" parent="ImportPopup/Margin"]
+margin_left = 5.0
+margin_top = 5.0
+margin_right = 507.0
+margin_bottom = 320.0
+
+[node name="Buttons" type="HBoxContainer" parent="ImportPopup/Margin/Split"]
+margin_right = 502.0
+margin_bottom = 19.0
+
+[node name="Constants" type="Button" parent="ImportPopup/Margin/Split/Buttons"]
+margin_right = 80.0
+margin_bottom = 19.0
+text = " Constants "
+
+[node name="Factors" type="Button" parent="ImportPopup/Margin/Split/Buttons"]
+margin_left = 84.0
+margin_right = 145.0
+margin_bottom = 19.0
+text = " Factors "
+
+[node name="Formulas" type="Button" parent="ImportPopup/Margin/Split/Buttons"]
+margin_left = 149.0
+margin_right = 224.0
+margin_bottom = 19.0
+text = " Formulas "
+
+[node name="Units" type="Button" parent="ImportPopup/Margin/Split/Buttons"]
+margin_left = 228.0
+margin_right = 272.0
+margin_bottom = 19.0
+text = " Units "
+
+[node name="Text" type="TextEdit" parent="ImportPopup/Margin/Split"]
+margin_top = 23.0
+margin_right = 502.0
+margin_bottom = 292.0
+size_flags_vertical = 3
+
+[node name="Import" type="Button" parent="ImportPopup/Margin/Split"]
+margin_top = 296.0
+margin_right = 502.0
+margin_bottom = 315.0
+text = "Import"
+
+[connection signal="pressed" from="Main/ToolBar/Split/Run" to="Main/Margin/Split/Code" method="_on_Run_pressed"]
+[connection signal="pressed" from="Main/ToolBar/Split/Export" to="Main/Margin/Split/Code" method="_on_Export_pressed"]
+[connection signal="pressed" from="Main/ToolBar/Split/Import" to="Main/Margin/Split/Code" method="_on_Import_pressed"]
+[connection signal="pressed" from="ImportPopup/Margin/Split/Buttons/Constants" to="ImportPopup" method="_on_Type_pressed" binds= [ "Constants" ]]
+[connection signal="pressed" from="ImportPopup/Margin/Split/Buttons/Factors" to="ImportPopup" method="_on_Type_pressed" binds= [ "Factors" ]]
+[connection signal="pressed" from="ImportPopup/Margin/Split/Buttons/Formulas" to="ImportPopup" method="_on_Type_pressed" binds= [ "Formulas" ]]
+[connection signal="pressed" from="ImportPopup/Margin/Split/Buttons/Units" to="ImportPopup" method="_on_Type_pressed" binds= [ "Units" ]]
+[connection signal="pressed" from="ImportPopup/Margin/Split/Import" to="ImportPopup" method="_on_Import_pressed"]
